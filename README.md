@@ -26,7 +26,7 @@ pip3 install pyqt5 toml typing
 
 ### Install PyMOL KVFinder-web Tools in PyMOL
 
-Download the latest version of PyMOL parKVFinder-web Tools from [here](https://github.com/LBC-LNBio/PyMOL-KVFinder-web-Tools/releases/latest/download/PyMOL-KVFinder-web-Tools.zip).
+Download the latest version of PyMOL KVFinder-web Tools from [here](https://github.com/LBC-LNBio/PyMOL-KVFinder-web-Tools/releases/latest/download/PyMOL-KVFinder-web-Tools.zip).
 
 1. Open PyMOL;
 2. Go to **Plugin** menu and select **Plugin Manager** option;
@@ -37,7 +37,7 @@ Download the latest version of PyMOL parKVFinder-web Tools from [here](https://g
 7. The **Confirm** window will open, click on **OK**;
 8. The **Sucess** window will open, confirming that the plugin has been installed;
 9. Restart PyMOL;
-10. **PyMOL parKVFinder-web Tools** is ready to use under **Plugin** menu.
+10. **PyMOL KVFinder-web Tools** is ready to use under **Plugin** menu.
 
 Or, if you clone this [repository](https://github.com/LBC-LNBio/PyMOL-KVFinder-web-Tools), instead of selecting `PyMOL-KVFinder-web-Tools.zip` (Step 5), user must select `__init__.py` of PyMOL-KVFinder-web-Tools-CNPEM directory.
 
