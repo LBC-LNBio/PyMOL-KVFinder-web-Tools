@@ -43,7 +43,7 @@ Or, if you clone this [repository](https://github.com/LBC-LNBio/PyMOL-KVFinder-w
 
 ## Documentation
 
-Documentation and tutorials are available at https://some-url.com
+Documentation and tutorials are available at https://some-url.com.
 
 ## License
 
