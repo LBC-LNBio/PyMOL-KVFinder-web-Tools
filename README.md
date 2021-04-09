@@ -1,8 +1,8 @@
 # PyMOL KVFinder-web Tools
 
-![GitHub Release](https://img.shields.io/github/release/osc/ondemand.svg?color=informational)
-[![GitHub License](https://img.shields.io/badge/license-MIT-green.svg?color=success)](https://opensource.org/licenses/MIT)
-[![DOI](http://joss.theoj.org/papers)](http://joss.theoj.org/papers)
+![GitHub Release](https://img.shields.io/github/v/release/LBC-LNBio/PyMOL-KVFinder-web-Tools.svg?color=informational)
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
+<!-- [![DOI](http://joss.theoj.org/papers)](http://joss.theoj.org/papers) -->
 
 Welcome to the PyMOL KVFinder-web Tools, this page was built to help you get started with our webservice client.
 
