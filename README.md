@@ -1,0 +1,52 @@
+# PyMOL KVFinder-web Tools
+
+Welcome to the PyMOL KVFinder-web Tools, this page was built to help you get started with our webservice client.
+
+PyMOL KVFinder-web Tools is a PyMOL v2 plugin for detecting and characterizing biomolecular cavities at KVFinder-web server.
+
+## Installation
+
+[PyMOL v2](https://pymol.org/2/) is required if you wish to use PyMOL KVFinder-web Tools.
+
+Follow these steps to install PyMOL KVFinder-web Tools:
+
+### Install python packages
+
+Install the required Python packages from [requirements.txt](https://github.com/LBC-LNBio/PyMOL-KVFinder-web-Tools/blob/master/requirements.txt) file.
+
+```bash
+pip3 install -r requirements.txt
+```
+
+or directly,
+
+```bash
+pip3 install pyqt5 toml typing
+```
+
+### Install PyMOL KVFinder-web Tools in PyMOL
+
+Download the latest version of PyMOL parKVFinder-web Tools from [here](https://github.com/LBC-LNBio/PyMOL-KVFinder-web-Tools/releases/latest/download/PyMOL-KVFinder-web-Tools.zip).
+
+1. Open PyMOL;
+2. Go to **Plugin** menu and select **Plugin Manager** option;
+3. The **Plugin Manager** window will open, go to the **Install New Plugin** tab;
+4. Under **Install from local file** group, click on **Choose file...**;
+5. The **Install Plugin** window will open, select the `PyMOL-KVFinder-web-Tools.zip`;
+6. The **Select plugin directory** window will open, select `/home/user/.pymol/startup` and click **OK**;
+7. The **Confirm** window will open, click on **OK**;
+8. The **Sucess** window will open, confirming that the plugin has been installed;
+9. Restart PyMOL;
+10. **PyMOL parKVFinder-web Tools** is ready to use under **Plugin** menu.
+
+Or, if you clone this [repository](https://github.com/LBC-LNBio/PyMOL-KVFinder-web-Tools), instead of selecting `PyMOL-KVFinder-web-Tools.zip` (Step 5), user must select `__init__.py` of PyMOL-KVFinder-web-Tools-CNPEM directory.
+
+## Documentation
+
+Documentation and tutorials are available at https://some-url.com
+
+## License
+
+The software is licensed under the terms of the GNU General Public License version 3 (GPL3) and is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+---
