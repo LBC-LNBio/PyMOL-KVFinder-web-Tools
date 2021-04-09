@@ -1,8 +1,7 @@
 # PyMOL KVFinder web tools core
-PyMOL-KVFinder-web-tools/
+PyMOL-KVFinder-web-tools/*
 !PyMOL-KVFinder-web-tools/__init__.py
 !PyMOL-KVFinder-web-tools/PyMOL-KVFinder-web-tools.ui
-!PyMOL-KVFinder-web-tools/LICENSE
 
 # Examples outputs
 examples/*/
