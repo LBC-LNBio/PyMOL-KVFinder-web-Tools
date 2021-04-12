@@ -14,7 +14,7 @@ authors:
     affiliation: "1, 2"
   - name: José Geraldo de Carvalho Pereira
     affiliation: 1
-  - name: Paulo Sergio Lopes de Oliveira^
+  - name: Paulo Sergio Lopes de Oliveira
     orcid: 0000-0002-1287-8019
     affiliation: "1, 2"
 affiliations:
