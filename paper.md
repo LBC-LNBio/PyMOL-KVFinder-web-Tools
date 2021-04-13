@@ -28,14 +28,20 @@ bibliography: paper.bib
 
 # Summary
 
-KVFinder-web (https://parkvfinder.cnpem.br) is an open source web-based application for cavity detection and spatial characterization with parKVFinder software [@Guerra2020] of any type of biomolecular structure. The web application is composed of two modules: a server and a PyMOL plugin client.
+KVFinder-web is an open-source web-based application for cavity detection and spatial characterization with parKVFinder software [@Guerra2020] of any type of biomolecular structure. The web application is composed of two modules: a server and a PyMOL plugin client.
 
-The server module (https://github.com/LBC-LNBio/KVFinder-webserver) has a Web-Queue-Worker architecture style. The Web component receives jobs requests in JSON format with detection parameters. If the request is valid, it returns a response with an unique id, based on the provided parameters, corresponding to the accepted job to the client. Otherwise, it returns an HTTP error code with an error message. The client must send a request with an id and the Web component returns "queued", "running" or "completed" together with the respective results. 
+The server module (https://github.com/LBC-LNBio/KVFinder-webserver), written in Rust, has a Web-Queue-Worker architecture style. The Web component receives jobs requests in JSON format with detection parameters. If the request is valid, it returns a response with a unique id, based on the provided parameters, corresponding to the accepted job to the client. Otherwise, it returns an HTTP error code with an error message. The client must send a request with an id and the Web component returns "queued", "running" or "completed" together with the respective results. The Queue component uses Ocypod software that receives jobs accepted by the Web component. The Worker component communicate with Queue component, requesting "queued" jobs, that will be processed with parKVFinder software. After completion, the job results are sent back to the Web component and made available to the client. According to the processing requirements, new Worker components can be allocated to increase capacity. The server module is packaged inside of a Docker container, making available to execute on different platforms and Cloud services.
 
-The client module (https://github.com/LBC-LNBio/PyMOL-KVFinder-web-Tools) is a plugin that integrates the KVFinder-web server with PyMOL.
+Our KVFinder-web service, located at https://parkvfinder.cnpem.br, running in a Cloud environment has some limitations compared to parKVFinder local installation, that are stated on the documentation.
+
+The client module (https://github.com/LBC-LNBio/PyMOL-KVFinder-web-Tools), written in Python, is a Qt interface that integrates the KVFinder-web server with PyMOL [@PyMOL]. The PyMOL KVFinder-web Tools is a user-friendly graphical user interface that enables customization of parKVFinder parameters for a target structure. Additionaly, the plugin has a Worker thread that handle communication with KVFinder-web server, including automatically downloading completed jobs from it.
+
+Both modules will undergo continuous improvements and updates, according to the needs of the scientific community, including characterizations.
 
 # Statment of need
 
 # Acknowledgements
+
+We thank the Brazilian Biosciences National Laboratory (LNBio), part of the Brazilian Center for Research in Energy and Materials (CNPEM) for accessibility to the Computational Biology Laboratory (LBC). This work was supported by the Fundação de Amparo à Pesquisa do Estado de São Paulo (FAPESP) [grant number 2018/00629-0].
 
 # References
