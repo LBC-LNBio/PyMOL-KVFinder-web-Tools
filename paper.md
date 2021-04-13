@@ -27,12 +27,10 @@ bibliography: paper.bib
 ---
 
 # Summary 
- 
 
 KVFinder-web is an open-source web-based application for cavity detection and spatial characterization with parKVFinder software [@Guerra2020] of any type of biomolecular structure. The KVFinder-web application is composed of two modules: a server and a PyMOL plugin client. The server module handles requests from the client, manages accepted jobs and performs cavity detection and characterization on accepted jobs. The client module sends job requests to the server, customize parKVFinder detection parameters and visualize job results on PyMOL [@PyMOL]. Our KVFinder-web service, available at https://parkvfinder.cnpem.br, running in a Cloud environment, has some limitations compared to parKVFinder local installation, that are stated on the documentation. Hence, users may opt to run jobs on a locally configured server or on our KVFinder-web service. 
 
 # Statment of need 
- 
 
 Biomolecules, mainly proteins, perform biological processes by interacting with other molecules, which occur at binding sites, located in cavities [@Oliveira2014;@Simoes2017]. These cavities exhibit some specific properties that ultimately dictate the molecules that can bind to them, aiding the understanding of molecular recognition patterns [@Henrich2010]. Thus, detection and characterization of biomolecular cavities play an important role in the rational drug discovery and design pipelines. Based on this, several computational methods have been developed for prospecting and describing binding sites [@Simoes2017], such as parKVFinder that applies a thread-level parallelization to efficiently achieve this goal [@Guerra2020]. Besides its advancements in usability, the installation and configuration of parKVFinder and even other standalone detection cavity software may limit access to less experienced users on local workstations. In addition, some users may lack of computational resources, which can ultimately affect a proper use of parKVFinder. In this sense, we introduced KVFinder-web to democratize and expand even further the user base of parKVFinder in the scientific community. These users will be able to perform cavity detection on outsourced computing platforms, e. g. institutional servers or Cloud infrastructure, which can globally benefit researchers, students and educators with few computational resources. 
 
