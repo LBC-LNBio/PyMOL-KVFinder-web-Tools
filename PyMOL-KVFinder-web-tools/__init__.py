@@ -2,9 +2,9 @@
 # -*- coding: utf-8 -*-
 
 #####################################################################################
-#    This is the KVFinder-web server client for PyMOL. It was developed using Qt    #
+#    This is the KVFinder-web service client for PyMOL. It was developed using Qt   #
 #    interface and Python. Changes in this file are not advised, as it controls     #
-#    all interactions with KVFinder-web server                                      #
+#    all interactions with KVFinder-web service.                                    #
 #                                                                                   #
 #    PyMOL KVFinder Web Tools is free software: you can redistribute it and/or      #    
 #    modify it under the terms of the GNU General Public License as published       #
@@ -36,10 +36,10 @@ worker = None
 
 
 ########## Relevant information ##########
-# Server (KVFinder-web server)           #
+# Web service (KVFinder-web service)     #
 # This variable defines the url of the   #
-# KVFinder-web server. Change this       #
-# variable to the server you are using   #
+# KVFinder-web service. Change this      #
+# variable to the service you are using  #
 # Server                                 #
 server = "http://parkvfinder.cnpem.br"   #
 # Port                                   # 
@@ -59,7 +59,7 @@ time_between_jobs = 2000                 #
 time_wait_status = 5000                  #
 #                                        #
 # Times jobs completed with downloaded   #
-# results are not checked in server      #
+# results are not checked in service     #
 times_job_completed_no_checked = 500     #
 #                                        #
 # Verbosity: print extra information     #
@@ -259,7 +259,7 @@ class PyMOLKVFinderWebTools(QMainWindow):
         else:
             return
 
-        print('\n[==> Submitting job to KVFinder-web server ...')
+        print('\n[==> Submitting job to KVFinder-web service ...')
 
         # Post request
         try:
@@ -296,11 +296,11 @@ class PyMOLKVFinderWebTools(QMainWindow):
             if 'output' not in reply.keys():
                 
                 if verbosity in [1, 3]:
-                    print('> Job successfully submitted to KVFinder-web server!') 
+                    print('> Job successfully submitted to KVFinder-web service!') 
 
                 # Message to user
                 message = Message(
-                    "Job successfully submitted to KVFinder-web server!",
+                    "Job successfully submitted to KVFinder-web service!",
                     self.job.id
                     )
                 message.exec_()
@@ -315,7 +315,7 @@ class PyMOLKVFinderWebTools(QMainWindow):
                 self.available_jobs.addItems(_get_jobs())
                 self.available_jobs.setCurrentText(self.job.id)
                 
-            # Job already sent to KVFinder-web server
+            # Job already sent to KVFinder-web service
             else:
                 status = reply["status"]
                 
@@ -323,11 +323,11 @@ class PyMOLKVFinderWebTools(QMainWindow):
                 if status == 'completed':
                     
                     if verbosity in [1, 3]:
-                        print('> Job already completed in KVFinder-web server!')
+                        print('> Job already completed in KVFinder-web service!')
                     
                     # Message to user
                     message = Message(
-                        "Job already completed in KVFinder-web server!\nDisplaying results ...",
+                        "Job already completed in KVFinder-web service!\nDisplaying results ...",
                         self.job.id,
                         status
                         )
@@ -359,11 +359,11 @@ class PyMOLKVFinderWebTools(QMainWindow):
                 elif status == 'running' or status == 'queued':
                     
                     if verbosity in [1, 3]:
-                        print('> Job already submitted to KVFinder-web server!') 
+                        print('> Job already submitted to KVFinder-web service!') 
 
                     # Message to user
                     message = Message(
-                        "Job already submitted to KVFinder-web server!",
+                        "Job already submitted to KVFinder-web service!",
                         self.job.id,
                         status
                         )
@@ -377,11 +377,11 @@ class PyMOLKVFinderWebTools(QMainWindow):
             
             # Message to user
             if verbosity in [1, 3]:
-                print("\n\033[93mWarning:\033[0m KVFinder-web server is Offline! Try again later!\n")
+                print("\n\033[93mWarning:\033[0m KVFinder-web service is Offline! Try again later!\n")
             message = QMessageBox.critical(
                 self, 
                 "Job Submission", 
-                "KVFinder-web server is Offline!\n\nTry again later!"
+                "KVFinder-web service is Offline!\n\nTry again later!"
                 )            
 
         elif er == QtNetwork.QNetworkReply.UnknownContentError:
@@ -392,11 +392,11 @@ class PyMOLKVFinderWebTools(QMainWindow):
             
             # Message to user
             if verbosity in [1, 3]:
-                print(f"\n\033[91mError:\033[0mJob exceedes the maximum payload of {data_limit} on KVFinder-web server!\n")
+                print(f"\n\033[91mError:\033[0mJob exceedes the maximum payload of {data_limit} on KVFinder-web service!\n")
             message = QMessageBox.critical(
                 self, 
                 "Job Submission", 
-                f"Job exceedes the maximum payload of {data_limit} on KVFinder-web server!"
+                f"Job exceedes the maximum payload of {data_limit} on KVFinder-web service!"
                 )       
 
         else:
@@ -1179,7 +1179,7 @@ class PyMOLKVFinderWebTools(QMainWindow):
 
 
     def _start_worker_thread(self) -> bool:
-        # Get KVFinder-web server status
+        # Get KVFinder-web service status
         server_status = _check_server_status(self.server)
         
         # Start Worker thread
@@ -1217,7 +1217,7 @@ class PyMOLKVFinderWebTools(QMainWindow):
         from PyQt5.QtCore import QUrl
 
         if verbosity in [1, 3]:
-            print(f"[==> Requesting Job ID ({data['id']}) to KVFinder-web server ...")
+            print(f"[==> Requesting Job ID ({data['id']}) to KVFinder-web service ...")
 
         try:
             # Prepare request
@@ -1290,11 +1290,11 @@ class PyMOLKVFinderWebTools(QMainWindow):
 
             # Message to user
             if verbosity in [1, 3]:
-                print(f"> Job ID ({self.data['id']}) was not found in KVFinder-web server!")
+                print(f"> Job ID ({self.data['id']}) was not found in KVFinder-web service!")
             message = QMessageBox.critical(
                 self, 
                 "Job Submission", 
-                f"Job ID ({self.data['id']}) was not found in KVFinder-web server!"
+                f"Job ID ({self.data['id']}) was not found in KVFinder-web service!"
                 )
         
         elif error == QtNetwork.QNetworkReply.ConnectionRefusedError:
@@ -1302,11 +1302,11 @@ class PyMOLKVFinderWebTools(QMainWindow):
 
             # Message to user
             if verbosity in [1, 3]:
-                print("> KVFinder-web server is Offline! Try again later!\n")
+                print("> KVFinder-web service is Offline! Try again later!\n")
             message = QMessageBox.critical(
                 self, 
                 "Job Submission", 
-                "KVFinder-web server is Offline!\n\nTry again later!"
+                "KVFinder-web service is Offline!\n\nTry again later!"
                 )
 
         # Clean data
@@ -1742,7 +1742,7 @@ class PyMOLKVFinderWebTools(QMainWindow):
         # Message to user
         message = QMessageBox(self)
         message.setWindowTitle(f"Job Notification")
-        message.setText(f'Job ID: {job_id}\nThis job is not available anymore in KVFinder-web server!\n')
+        message.setText(f'Job ID: {job_id}\nThis job is not available anymore in KVFinder-web service!\n')
         message.setInformativeText(f"Jobs are kept for {days_job_expire} days after completion.")
         if message.exec_() == QMessageBox.Ok:
             # Send signal to Worker thread
@@ -1830,7 +1830,7 @@ class Job(object):
                 if not os.path.exists(self.ligand):
                     if parameters['files']['ligand'] in cmd.get_names("all"):
                         cmd.save(self.ligand, parameters['files']['ligand'], 0,  'pdb')
-        # Request information (server)
+        # Request information (service)
         # Input PDB
         if self.pdb:
             self._add_pdb(self.pdb)
@@ -1986,12 +1986,12 @@ class Worker(QThread):
     def run(self) -> None:
         from PyQt5.QtCore import QTimer, QEventLoop
         
-        # Times completed jobs with results are not checked in KVFinder-web server
+        # Times completed jobs with results are not checked in KVFinder-web service
         counter = 0
 
         while True:
           
-            # Loop to wait QMessageBox signal from GUI thread that delete jobs that are no long available in KVFinder-web server
+            # Loop to wait QMessageBox signal from GUI thread that delete jobs that are no long available in KVFinder-web service
             while self.wait:
                 # Wait timer to check wait status
                 loop = QEventLoop()
@@ -2067,28 +2067,28 @@ class Worker(QThread):
             else:
                 # Message to user
                 if verbosity in [2, 3]:
-                    print('> Checking KVFinder-web server status ...')
+                    print('> Checking KVFinder-web service status ...')
                 
-                # Check server status
+                # Check service status
                 status = _check_server_status(self.server)
                 while not ( status ):
                     if verbosity in [2, 3]:
-                        print("\n\033[93mWarning:\033[0m KVFinder-web server is Offline!\n")
-                    # Send signal that server is down
+                        print("\n\033[93mWarning:\033[0m KVFinder-web service is Offline!\n")
+                    # Send signal that service is down
                     self.server_status_signal.emit(status)
                     
-                    # Wait timer to repeat server status check
+                    # Wait timer to repeat service status check
                     loop = QEventLoop()
                     QTimer.singleShot(time_server_down, loop.quit)
                     loop.exec_()
 
                     # Message to user
                     if verbosity in [2, 3]:
-                        print('> Checking KVFinder-web server status ...')
+                        print('> Checking KVFinder-web service status ...')
 
                 # Update server_status value
                 self.server_status = status
-                # Send signal that server is up
+                # Send signal that service is up
                 self.server_status_signal.emit(self.server_status)
             
                 # Wait timer when no jobs are being checked 
@@ -2127,7 +2127,7 @@ class Worker(QThread):
 
         if error == QtNetwork.QNetworkReply.NoError:
             
-            # Read data retrived from server
+            # Read data retrived from service
             reply = json.loads(str(self.reply.readAll(), 'utf-8'))
             
             # Pass outputs to Job class
@@ -2166,7 +2166,7 @@ class Worker(QThread):
             
             # Message to user
             if verbosity in [2, 3]:
-                print("\n\033[93mWarning:\033[0m KVFinder-web server is Offline!\n")
+                print("\n\033[93mWarning:\033[0m KVFinder-web service is Offline!\n")
             
             # Send Server Down Signal to GUI Thread 
             self.server_down.emit()
@@ -2566,15 +2566,15 @@ def _get_jobs() -> list:
 about_text = """
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
 <html><head><meta name="qrichtext" content="1" /><style type="text/css"></style></head><body style=" font-family:'Sans Serif'; font-size:10pt; font-weight:400; font-style:normal;">
-<p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">PyMOL KVFinder-web Tools integrates PyMOL (<a href="http://PyMOL.org/"><span style=" text-decoration: underline; color:#0000ff;">http://PyMOL.org/</span></a>) with KVFinder-web server.</p>
+<p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">PyMOL KVFinder-web Tools integrates PyMOL (<a href="http://PyMOL.org/"><span style=" text-decoration: underline; color:#0000ff;">http://PyMOL.org/</span></a>) with KVFinder-web service.</p>
 <p style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br /></p>
-<p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">In the simplest case of running a job on KVFinder-web server:</p>
+<p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">In the simplest case of running a job on KVFinder-web service:</p>
 <p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">1) Load a target biomolecular structure into PyMOL.</p>
 <p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">2) Start PyMOL KVFinder-web Tools plugin.</p>
 <p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">3) Select an input PDB on 'Main' tab.</p>
 <p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">4) Click on the 'Run KVFinder-web' button.</p>
 <p style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br /></p>
-<p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">Jobs sent to KVFinder-server are automatically checked by a worker thread when the plugin is activated, which downloads the results upon job completion. Further, jobs are available on the server up to {} day{} after completion.</p>
+<p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">Jobs sent to KVFinder-web service are automatically checked by a worker thread when the plugin is activated, which downloads the results upon job completion. Further, jobs are available on the web service up to {} day{} after completion.</p>
 <p style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br /></p>
 <p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">Job IDs are available on 'Results' tab under 'Jobs' tab, where users can check their status and input file, ligand file, output directory and parameters file locations. In addition, after the job is complete, the results can be visualiazed by clicking on 'Show' button with a job ID selected. Also, the results can be loaded directly from a results file (<span style=" font-style:italic;">.KVFinder.results.toml</span>) on the 'Results Visualization' tab. Furthermore, users can also add job IDs to PyMOL KVFinder-web Tools by clicking on 'Add ID' and providing a valid job ID to the form.</p>
 <p style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br /></p>
@@ -2584,7 +2584,7 @@ about_text = """
 <p style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br /></p>
 <p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">The 'Ligand adjustment' keeps cavity points around a target ligand PDB within a radius defined by the 'Ligand Cutoff' parameter.</p>
 <p style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br /></p>
-<p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">parKVFinder, KVFinder-web server and PyMOL KVFinder-web Tools was developed by:</p>
+<p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">parKVFinder, KVFinder-web service and PyMOL KVFinder-web Tools were developed by:</p>
 <p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">- João Victor da Silva Guerra</p>
 <p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">- Helder Veras Filho</p>
 <p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">- Leandro Oliveira Bortot</p>
@@ -2597,7 +2597,10 @@ about_text = """
 <p style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br /></p>
 <p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">Please refer and cite the parKVFinder paper if you use it in a publication.</p>
 <p style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br /></p>
-<p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">Citation:</p>
+<p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">For our cavity detection and characterization software, cite:</p>
+<p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">João Victor da Silva Guerra, Helder Veras Filho, Leandro Oliveira Bortot, Rodrigo Vargas Honorato, José Geraldo de Carvalho Pereira, Paulo Sergio Lopes de Oliveira, ParKVFinder: A thread-level parallel approach in biomolecular cavity detection, SoftwareX, 2020, https://doi.org/10.1016/j.softx.2020.100606.</p>
+<p style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br /></p>
+<p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">For our KVFinder-web service, cite:</p>
 <p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">&lt;paper&gt;</p>
 <p style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br /></p>
 <p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">Citation for PyMOL 2 may be found here:</p>
