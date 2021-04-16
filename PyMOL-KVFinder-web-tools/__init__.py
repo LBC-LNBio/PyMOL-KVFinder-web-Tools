@@ -1,25 +1,25 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-#####################################################################################
-#    This is the KVFinder-web service client for PyMOL. It was developed using Qt   #
-#    interface and Python. Changes in this file are not advised, as it controls     #
-#    all interactions with KVFinder-web service.                                    #
-#                                                                                   #
-#    PyMOL KVFinder Web Tools is free software: you can redistribute it and/or      #
-#    modify it under the terms of the GNU General Public License as published       #
-#    by the Free Software Foundation, either version 3 of the License, or           #
-#    (at your option) any later version.                                            #
-#                                                                                   #
-#    PyMOL KVFinder Web Tools is distributed in the hope that it will be useful,    #
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of                 #
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the                  #
-#    GNU General Public License for more details.                                   #
-#                                                                                   #
-#    You should have received a copy of the GNU General Public License  along with  #
-#    PyMOL KVFinder Web Tools.  If not, see <http://www.gnu.org/licenses/>.         #
-#                                                                                   #
-#####################################################################################
+###############################################################################
+#  This is the KVFinder-web service client for PyMOL. It was developed using  #
+#  Qt interface and Python. Changes in this file are not advised, as it       #
+#  controls all interactions with KVFinder-web service.                       #
+#                                                                             #
+#  PyMOL KVFinder Web Tools is free software: you can redistribute it and/or  #
+#  modify it under the terms of the GNU General Public License as published   #
+#  by the Free Software Foundation, either version 3 of the License, or       #
+#  (at your option) any later version.                                        #
+#                                                                             #
+#  PyMOL KVFinder Web Tools is distributed in the hope that it will be        #
+#  useful, but WITHOUT ANY WARRANTY; without even the implied warranty of     #
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the              #
+#  GNU General Public License for more details.                               #
+#                                                                             #
+#  You should have received a copy of the GNU General Public License along    #
+#  with PyMOL KVFinder Web Tools. If not, see <http://www.gnu.org/licenses/>. #
+#                                                                             #
+###############################################################################
 
 
 from __future__ import absolute_import, print_function, annotations
@@ -37,7 +37,8 @@ dialog = None
 worker = None
 
 
-########## Relevant information ##########
+##########################################
+#          Relevant information          #
 # Web service (KVFinder-web service)     #
 # This variable defines the url of the   #
 # KVFinder-web service. Change this      #
@@ -408,7 +409,7 @@ class PyMOLKVFinderWebTools(QMainWindow):
                     self.job.save(self.job.id)
 
                     # Add Job ID to Results tab
-                    if self.job.id in [self.available_jobs.itemText(i) for i in range(self.available_jobs.count())]:
+                    if self.job.id not in [self.available_jobs.itemText(i) for i in range(self.available_jobs.count())]:
                         self.available_jobs.addItem(self.job.id)
                     self.available_jobs.setCurrentText(self.job.id)
 
@@ -689,6 +690,7 @@ class PyMOLKVFinderWebTools(QMainWindow):
                     cmd.delete(self.ligand_pdb)
                 if self.cavity_pdb:
                     cmd.delete(self.cavity_pdb)
+                global results
                 results = self.input_pdb = self.ligand_pdb = self.cavity_pdb = None
                 cmd.frame(1)
 
@@ -2539,7 +2541,7 @@ class Worker(QThread):
         for f in os.listdir(d):
             f = os.path.join(d, f)
             if os.path.isdir(f):
-                self.erase_job_dir(f)
+                Worker.erase_job_dir(f)
             else:
                 os.remove(f)
         os.rmdir(d)
