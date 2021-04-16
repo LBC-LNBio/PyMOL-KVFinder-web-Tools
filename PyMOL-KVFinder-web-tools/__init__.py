@@ -442,7 +442,7 @@ class PyMOLKVFinderWebTools(QMainWindow):
             # Message to user
             if verbosity in [1, 3]:
                 print("\n\033[93mWarning:\033[0m KVFinder-web service is Offline! Try again later!\n")
-            message = QMessageBox.critical(
+            QMessageBox.critical(
                 self,
                 "Job Submission",
                 "KVFinder-web service is Offline!\n\nTry again later!"
@@ -457,7 +457,7 @@ class PyMOLKVFinderWebTools(QMainWindow):
             # Message to user
             if verbosity in [1, 3]:
                 print(f"\n\033[91mError:\033[0mJob exceedes the maximum payload of {data_limit} on KVFinder-web service!\n")
-            message = QMessageBox.critical(
+            QMessageBox.critical(
                 self,
                 "Job Submission",
                 f"Job exceedes the maximum payload of {data_limit} on KVFinder-web service!"
@@ -1414,7 +1414,7 @@ class PyMOLKVFinderWebTools(QMainWindow):
             # Message to user
             if verbosity in [1, 3]:
                 print(f"> Job ID ({self.data['id']}) was not found in KVFinder-web service!")
-            message = QMessageBox.critical(
+            QMessageBox.critical(
                 self,
                 "Job Submission",
                 f"Job ID ({self.data['id']}) was not found in KVFinder-web service!"
@@ -1426,7 +1426,7 @@ class PyMOLKVFinderWebTools(QMainWindow):
             # Message to user
             if verbosity in [1, 3]:
                 print("> KVFinder-web service is Offline! Try again later!\n")
-            message = QMessageBox.critical(
+            QMessageBox.critical(
                 self,
                 "Job Submission",
                 "KVFinder-web service is Offline!\n\nTry again later!"
@@ -2694,7 +2694,7 @@ class Form(QDialog):
             # Message to user
             if verbosity in [2, 3]:
                 print("Fill required fields: Job ID, Output Base Name and/or Output Directory.")
-            message = QMessageBox.critical(
+            QMessageBox.critical(
                 self,
                 "Job Submission",
                 "Fill required fields: Job ID, Output Base Name and Output Directory."
