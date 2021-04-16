@@ -1,6 +1,6 @@
 # PyMOL KVFinder-web Tools
 
-![GitHub Release](https://img.shields.io/github/v/release/LBC-LNBio/PyMOL-KVFinder-web-Tools.svg?color=informational)
+[![release](https://img.shields.io/github/v/release/LBC-LNBio/PyMOL-KVFinder-web-Tools.svg?color=informational)](https://github.com/LBC-LNBio/PyMOL-KVFinder-web-Tools/releases/latest)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 <!-- [![DOI](http://joss.theoj.org/papers)](http://joss.theoj.org/papers) -->
 
