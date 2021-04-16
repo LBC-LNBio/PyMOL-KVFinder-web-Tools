@@ -447,7 +447,6 @@ class PyMOLKVFinderWebTools(QMainWindow):
                 "Job Submission",
                 "KVFinder-web service is Offline!\n\nTry again later!"
             )
-            message.exec_()
 
         elif er == QtNetwork.QNetworkReply.UnknownContentError:
             from PyQt5.QtWidgets import QMessageBox
@@ -463,7 +462,6 @@ class PyMOLKVFinderWebTools(QMainWindow):
                 "Job Submission",
                 f"Job exceedes the maximum payload of {data_limit} on KVFinder-web service!"
             )
-            message.exec_()
 
         else:
             reply = str(self.reply.readAll(), 'utf-8')
@@ -1421,7 +1419,6 @@ class PyMOLKVFinderWebTools(QMainWindow):
                 "Job Submission",
                 f"Job ID ({self.data['id']}) was not found in KVFinder-web service!"
             )
-            message.exec_()
 
         elif error == QtNetwork.QNetworkReply.ConnectionRefusedError:
             from PyQt5.QtWidgets import QMessageBox
@@ -1434,7 +1431,6 @@ class PyMOLKVFinderWebTools(QMainWindow):
                 "Job Submission",
                 "KVFinder-web service is Offline!\n\nTry again later!"
             )
-            message.exec_()
 
         # Clean data
         self.data = None
@@ -2703,7 +2699,7 @@ class Form(QDialog):
                 "Job Submission",
                 "Fill required fields: Job ID, Output Base Name and Output Directory."
             )
-            message.exec_()
+
             return None
 
     def get_data(self) -> Dict[str, Any]:
