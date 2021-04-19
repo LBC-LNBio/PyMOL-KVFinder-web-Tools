@@ -12,10 +12,10 @@ authors:
   - name: João Victor da Silva Guerra
     orcid: 0000-0002-6800-4425
     affiliation: "1, 2"
-  - name: Helder Veras Ribeiro Filho
-    orcid: 0000-0001-8471-207X
-    affiliation: 1  
-  - name: José Geraldo de Carvalho Pereira^[corresponding author]
+  # - name: Helder Veras Ribeiro Filho
+  #   orcid: 0000-0001-8471-207X
+  #   affiliation: 1  
+  - name: José Geraldo de Carvalho Pereira
     orcid: 0000-0003-1041-0209
     affiliation: 1
   - name: Paulo Sergio Lopes de Oliveira^[corresponding author]
@@ -36,7 +36,7 @@ KVFinder-web is an open-source web-based application of parKVFinder software [@G
 
 # Statment of need 
 
-Biomolecules, such as proteins, perform biological processes by interacting with other molecules,at binding sites [@Oliveira2014;@Simoes2017]. These sites are mostly cavities that exhibit specific properties and, ultimately, dictate the preference for molecules to bind. [@Henrich2010]. Thus, detection and characterization of biomolecular cavities play an important role in the rational drug discovery and design pipelines. Based on this, several computational methods have been developed for prospecting and describing binding sites [@Simoes2017], such as parKVFinder that applies a thread-level parallelization to efficiently achieve this goal. Besides its advancements in usability, the installation and configuration of parKVFinder and even other standalone detection cavity software may limit access to less experienced users on local workstations. In addition, some users may lack of computational resources, which can ultimately affect a proper use of parKVFinder. In this sense, we introduced KVFinder-web to democratize and expand even further the user base of parKVFinder in the scientific community. These users will be able to perform cavity detection on outsourced computing platforms, e. g. institutional servers or Cloud infrastructure, which can globally benefit researchers, students and educators with limited computational resources.  
+Biomolecules, such as proteins, perform biological processes by interacting with other molecules at binding sites [@Oliveira2014;@Simoes2017]. These sites are mostly cavities that exhibit specific properties and, ultimately, dictate the preference for molecules to bind [@Henrich2010]. Thus, detection and characterization of biomolecular cavities play an important role in the rational drug discovery and design pipelines. Based on this, several computational methods have been developed for prospecting and describing binding sites [@Simoes2017], such as parKVFinder that applies a thread-level parallelization to efficiently achieve this goal. Besides its advancements in usability, the installation and configuration of parKVFinder and even other standalone detection cavity software may limit access to less experienced users on local workstations. In addition, some users may lack of computational resources, which can ultimately affect a proper use of parKVFinder. In this sense, we introduced KVFinder-web to democratize and expand even further the user base of parKVFinder in the scientific community. These users will be able to perform cavity detection on outsourced computing platforms, e. g. institutional servers or Cloud infrastructure, which can globally benefit researchers, students and educators with limited computational resources.  
 
 # Web service 
 
