@@ -1,5 +1,5 @@
 ---
-title: 'KVFinder-web: a web-based tool for detecting and characterizing cavities in biomolecules'
+title: 'KVFinder-web: a web-based application for detecting and characterizing cavities in biomolecules'
 tags:
   - Rust
   - C
@@ -26,7 +26,7 @@ affiliations:
    index: 1
  - name: Postgraduate Program in Pharmaceutical Sciences, Faculty of Pharmaceutical Sciences, University of Campinas, Campinas, SP, Brazil
    index: 2
-date: 12 April 2021
+date: 19 April 2021
 bibliography: paper.bib
 ---
 
