@@ -13,6 +13,7 @@ authors:
     orcid: 0000-0002-6800-4425
     affiliation: "1, 2"
   - name: José Geraldo de Carvalho Pereira
+    orcid: 0000-0003-1041-0209
     affiliation: 1
   - name: Paulo Sergio Lopes de Oliveira
     orcid: 0000-0002-1287-8019
