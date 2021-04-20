@@ -24,7 +24,7 @@ authors:
 affiliations:
  - name: Brazilian Biosciences National Laboratory (LNBio), Brazilian Center for Research in Energy and Materials (CNPEM), Campinas 13083-100, SP, Brazil
    index: 1
- - name: Postgraduate Program in Pharmaceutical Sciences, Faculty of Pharmaceutical Sciences, University of Campinas, Campinas, SP, Brazil
+ - name: Graduate Program in Pharmaceutical Sciences, Faculty of Pharmaceutical Sciences, University of Campinas, Campinas, SP, Brazil
    index: 2
 date: 19 April 2021
 bibliography: paper.bib
