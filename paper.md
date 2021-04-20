@@ -12,10 +12,10 @@ authors:
   - name: João Victor da Silva Guerra
     orcid: 0000-0002-6800-4425
     affiliation: "1, 2"
-  # - name: Helder Veras Ribeiro Filho
-  #   orcid: 0000-0001-8471-207X
-  #   affiliation: 1  
-  - name: José Geraldo de Carvalho Pereira
+  - name: Helder Veras Ribeiro Filho
+    orcid: 0000-0001-8471-207X
+    affiliation: 1  
+  - name: José Geraldo de Carvalho Pereira^[corresponding author]
     orcid: 0000-0003-1041-0209
     affiliation: 1
   - name: Paulo Sergio Lopes de Oliveira^[corresponding author]
