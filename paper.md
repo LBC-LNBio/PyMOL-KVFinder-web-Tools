@@ -32,7 +32,7 @@ bibliography: paper.bib
 
 # Summary 
 
-KVFinder-web is an open-source web-based application of parKVFinder software [@Guerra2020] for cavity detection and spatial characterization of any type of biomolecular structure. The KVFinder-web application has two components: a RESTful web service and a PyMOL plugin client. The web service handles requests from the clients, manages accepted jobs and performs cavity detection and characterization on accepted jobs. The client sends job requests to the web service, customize parKVFinder detection parameters and visualize job results on PyMOL [@PyMOL]. We provide a publicly available KVFinder-web service at https://parkvfinder.cnpem.br, running in a Cloud environment; additionally, a KVFinder-web service can also be configured locally. Hence, users may opt to run jobs on a locally configured service or on our public KVFinder-web service.
+KVFinder-web is an open-source web-based application of parKVFinder software [@Guerra2020] for cavity detection and spatial characterization of any type of biomolecular structure. The KVFinder-web application has two components: a RESTful web service and a PyMOL plugin client. The web service handles requests from the clients, manages accepted jobs and performs cavity detection and characterization on accepted jobs. The client sends job requests to the web service, customize parKVFinder detection parameters and visualize job results on PyMOL [@PyMOL]. We provide a publicly available KVFinder-web service at http://parkvfinder.cnpem.br, running in a Cloud environment; additionally, a KVFinder-web service can also be configured locally. Hence, users may opt to run jobs on a locally configured service or on our public KVFinder-web service.
 
 # Statment of need 
 
