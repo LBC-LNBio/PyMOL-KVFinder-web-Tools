@@ -2,12 +2,12 @@
 title: 'KVFinder-web: a web-based application for detecting and characterizing cavities in biomolecules'
 tags:
   - Rust
-  - C
   - Python
   - PyMOL
   - cavity detection
   - cavity characterization
-  - webservice
+  - web service
+  - web server
 authors:
   - name: João Victor da Silva Guerra
     orcid: 0000-0002-6800-4425
@@ -32,11 +32,11 @@ bibliography: paper.bib
 
 # Summary 
 
-KVFinder-web is an open-source web-based application of parKVFinder software [@Guerra2020] for cavity detection and spatial characterization of any type of biomolecular structure. The KVFinder-web application has two components: a RESTful web service and a PyMOL plugin client. The web service handles requests from the clients, manages accepted jobs and performs cavity detection and characterization on accepted jobs. The client sends job requests to the web service, customize parKVFinder detection parameters and visualize job results on PyMOL [@PyMOL]. Our publicly available KVFinder-web service (http://parkvfinder.cnpem.br:8081), running in a Cloud environment, has some limitations compared to parKVFinder local installation, that are stated on the documentation (https://lbc-lnbio.github.io/KVFinder-web). Hence, users may opt to run jobs on a locally configured server or on our public KVFinder-web service. 
+KVFinder-web is an open-source web-based application of parKVFinder software [@Guerra2020] for cavity detection and spatial characterization of any type of biomolecular structure. The KVFinder-web application has two components: a RESTful web service and a PyMOL plugin client. The web service handles requests from the clients, manages accepted jobs and performs cavity detection and characterization on accepted jobs. The client sends job requests to the web service, customize parKVFinder detection parameters and visualize job results on PyMOL [@PyMOL]. We provide a publicly available KVFinder-web service at https://parkvfinder.cnpem.br:8081, running in a Cloud environment; additionally, a KVFinder-web service can also be configured locally. Hence, users may opt to run jobs on a locally configured service or on our public KVFinder-web service.
 
 # Statment of need 
 
-Biomolecules, such as proteins, perform biological processes by interacting with other molecules at binding sites [@Oliveira2014;@Simoes2017]. These sites are mostly cavities that exhibit specific properties and, ultimately, dictate the preference for molecules to bind [@Henrich2010]. Thus, detection and characterization of biomolecular cavities play an important role in the rational drug discovery and design pipelines. Based on this, several computational methods have been developed for prospecting and describing binding sites [@Simoes2017], such as parKVFinder that applies a thread-level parallelization to efficiently achieve this goal. Besides its advancements in usability, the installation and configuration of parKVFinder and even other standalone detection cavity software may limit access to less experienced users on local workstations. In addition, some users may lack of computational resources, which can ultimately affect a proper use of parKVFinder. In this sense, we introduced KVFinder-web to democratize and expand even further the user base of parKVFinder in the scientific community. These users will be able to perform cavity detection on outsourced computing platforms, e. g. institutional servers or Cloud infrastructure, which can globally benefit researchers, students and educators with limited computational resources.  
+Biomolecules, such as proteins, perform biological processes by interacting with other molecules at binding sites [@Oliveira2014;@Simoes2017]. These sites are mostly cavities that exhibit specific properties and, ultimately, dictate the preference for molecules to bind [@Henrich2010]. Thus, detection and characterization of biomolecular cavities play an important role in the rational drug discovery and design pipelines. Based on this, several computational methods have been developed for prospecting and describing binding sites [@Simoes2017], such as parKVFinder that applies a thread-level parallelization to efficiently achieve this goal. Besides its advancements in usability, the installation and configuration of parKVFinder and even other standalone detection cavity software may limit access to less experienced users on local workstations. In addition, some users may lack of computational resources, which can ultimately affect a proper use of parKVFinder. In this sense, we introduced KVFinder-web to democratize and expand even further the user base of parKVFinder in the scientific community. These users will be able to perform cavity detection on third-party computing platforms, e. g. institutional servers or Cloud infrastructure, using parKVFinder as a service (SaaS), which can globally benefit researchers, students and educators with limited computational resources.
 
 # Web service 
 
@@ -44,9 +44,9 @@ The web service (https://github.com/LBC-LNBio/KVFinder-web-service), written mai
 
 # Client (PyMOL plugin) 
 
-The client (https://github.com/LBC-LNBio/PyMOL-KVFinder-web-Tools), written in Python, is a Qt interface that integrates the KVFinder-web service with PyMOL. The PyMOL KVFinder-web Tools is a user-friendly graphical user interface (GUI) that enables customization of parKVFinder parameters for a target structure and submits jobs via HTTP POST request to a configured KVFinder-web service. After submission, jobs are routinely and asynchronously requested via HTTP GET request to the KVFinder-web service. When a job is finished, the client automatically processes the incoming data to files and makes it available to the GUI. 
+To interact with the web service, we developed a graphical client (https://github.com/LBC-LNBio/PyMOL-KVFinder-web-Tools), written in Python and Qt, that integrates the KVFinder-web service with PyMOL. The PyMOL KVFinder-web Tools is a user-friendly graphical user interface (GUI) that enables customization of parKVFinder parameters for a target structure and submits jobs via HTTP POST request to a configured KVFinder-web service. After submission, jobs are routinely and asynchronously requested via HTTP GET request to the KVFinder-web service. When a job is finished, the client automatically processes the incoming data to files and makes it available to the GUI. The PyMOL KVFinder-web Tools is the recommended client to our publicly available web service.  Besides, we developed a client script, also written in Python, to guide other developers to create standalone clients according to their specific needs. 
 
-Both modules will undergo continuous improvements and updates, according to the needs of the scientific community, including new characterizations and performance enhancements.
+Both web service and client modules will undergo continuous improvements and updates, according to the needs of the scientific community, including new characterizations and performance enhancements.
 
 # Acknowledgements 
 
