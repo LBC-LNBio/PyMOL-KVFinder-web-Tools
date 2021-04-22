@@ -2023,7 +2023,7 @@ class Job(object):
             Whether the molecular structure should be treated as a ligand in parKVFinder software
         """
         with open(pdb_fn) as f:
-            pdb = f.readlines()
+            pdb = f.read()
         if is_ligand:
             self.input["pdb_ligand"] = pdb
         else:
