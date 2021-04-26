@@ -48,7 +48,7 @@ To interact with the web service, we developed a graphical client (https://githu
 
 Both web service and client modules will undergo continuous improvements and updates, according to the needs of the scientific community, including new characterizations and performance enhancements.
 
-![An example of HIV-1 protease cavity detection with PyMOL KVFinder-web Tools. (a) Main parameters tab containing the parKVFinder detection parameters and molecular structures to be defined. (b) Visualization tab containing the incoming data from KVFinder-web service processed to files and spatial characterization (volume, area and interface residues). (c) PyMOL viewer displaying the molecular structure of HIV-1 protease (green cartoon) with its detected cavities (gray surface) and a non-cyclic urea (red sticks) binded to one of them.\label{fig:figure}](img/figure.png){ width=65% }
+![An example of HIV-1 protease cavity detection with PyMOL KVFinder-web Tools. (a) Main parameters tab containing the parKVFinder detection parameters and molecular structures to be defined. (b) Visualization tab containing the incoming data from KVFinder-web service processed to files and spatial characterization (volume, area and interface residues). (c) PyMOL viewer displaying the molecular structure of HIV-1 protease (green cartoon) with its detected cavities (gray surface) and a non-cyclic urea (red sticks) binded to one of them.\label{fig:figure}](img/figure.png){ width=100% }
 
 # Acknowledgements 
 
