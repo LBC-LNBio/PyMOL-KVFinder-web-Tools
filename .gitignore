@@ -5,3 +5,6 @@ PyMOL-KVFinder-web-tools/*
 
 # Examples outputs
 examples/*/
+
+# Paper PDF
+paper/paper.pdf
