@@ -1,13 +1,15 @@
 ---
 title: 'KVFinder-web: a web-based application for detecting and characterizing cavities in biomolecules'
 tags:
+  - cavity detection
+  - cavity characterization
+  - protein structure
+  - molecular structure
+  - web service
+  - web server
   - Rust
   - Python
   - PyMOL
-  - cavity detection
-  - cavity characterization
-  - web service
-  - web server
 authors:
   - name: João Victor da Silva Guerra
     orcid: 0000-0002-6800-4425
