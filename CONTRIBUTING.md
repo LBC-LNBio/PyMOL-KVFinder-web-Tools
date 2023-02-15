@@ -14,3 +14,4 @@ Only make sure the bug or request has not already been reported. Click on “Sea
 Please note we have a code of conduct, please follow it in all your interactions with the project.
 
 Thank you for helping us improve KVFinder-web service!
+
