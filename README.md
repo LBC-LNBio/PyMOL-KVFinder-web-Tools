@@ -1,11 +1,9 @@
 # PyMOL KVFinder-web Tools
 
-[![release](https://img.shields.io/github/v/release/LBC-LNBio/PyMOL-KVFinder-web-Tools.svg?color=informational)](https://github.com/LBC-LNBio/PyMOL-KVFinder-web-Tools/releases/latest)
-[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
+![GitHub release (latest by date)](https://img.shields.io/github/v/release/LBC-LNBio/PyMOL-KVFinder-web-Tools?color=informational)
+![GitHub](https://img.shields.io/github/license/LBC-LNBio/PyMOL-KVFinder-web-Tools)
 
-<!-- [![DOI](http://joss.theoj.org/papers)](http://joss.theoj.org/papers) -->
-
-Welcome to the PyMOL KVFinder-web Tools, this page was built to help you get started with our web service client.
+Welcome to the PyMOL KVFinder-web Tools, this page was built to help you get started with our graphical PyMOL plugin for [KVFinder-web service](https://github.com/LBC-LNBio/KVFinder-web-service)..
 
 PyMOL KVFinder-web Tools is a PyMOL v2 plugin for detecting and characterizing biomolecular cavities at a KVFinder-web service, which is natively configured to our publicly available web service (http://kvfinder-web.cnpem.br).
 
