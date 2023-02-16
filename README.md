@@ -51,6 +51,10 @@ Or, if you clone this [repository](https://github.com/LBC-LNBio/PyMOL-KVFinder-w
 
 The KVFinder-web portal, written in R and Shiny, is a graphical web application for detecting and characterizing biomolecular cavities at a KVFinder-web service, natively configured in our publicly available web service ([http://kvfinder-web.cnpem.br](http://kvfinder-web.cnpem.br)).
 
+### KVFinder-web service
+
+KVFinder-web service, written in Rust language, has a robust web-queue-worker architecture that processes HTTP requests and responses from the interface, manages jobs, and executes parKVFinder for accepted jobs.
+
 ## Funding
 
 KVFinder-web interface was supported by Fundação de Amparo à Pesquisa do Estado de São Paulo (FAPESP) [Grant Number 2018/00629-0], Brazilian Biosciences National Laboratory (LNBio) and Brazilian Center for Research in Energy and Materials (CNPEM).
