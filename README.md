@@ -3,7 +3,7 @@
 ![GitHub release (latest by date)](https://img.shields.io/github/v/release/LBC-LNBio/PyMOL-KVFinder-web-Tools?color=informational)
 ![GitHub](https://img.shields.io/github/license/LBC-LNBio/PyMOL-KVFinder-web-Tools)
 
-Welcome to the PyMOL KVFinder-web Tools, this page was built to help you get started with our graphical PyMOL plugin for [KVFinder-web service](https://github.com/LBC-LNBio/KVFinder-web-service)..
+Welcome to the PyMOL KVFinder-web Tools, this page was built to help you get started with our graphical PyMOL plugin for [KVFinder-web service](https://github.com/LBC-LNBio/KVFinder-web-service).
 
 ## KVFinder-web
 
