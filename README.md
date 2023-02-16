@@ -16,7 +16,7 @@ The KVFinder-web application has two independent components:
   - [KVFinder-web portal](https://github.com/LBC-LNBio/KVFinder-web-portal): a graphical web portal;
 - a RESTful web service: [KVFinder-web service](https://github.com/LBC-LNBio/KVFinder-web-service);
 
-The full KVFinder-web documentation can be found here: (<http://lbc-lnbio.github.io/KVFinder-web>).
+The full KVFinder-web documentation can be found here: <http://lbc-lnbio.github.io/KVFinder-web>.
 
 ### PyMOL KVFinder-web Tools
 
