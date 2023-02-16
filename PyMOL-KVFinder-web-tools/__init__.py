@@ -44,7 +44,7 @@ worker = None
 # KVFinder-web service. Change this      #
 # variable to the service you are using  #
 # Server                                 #
-server = "http://parkvfinder.cnpem.br"   #
+server = "http://kvfinder-web.cnpem.br"  #
 # Port                                   #
 port = "8081"                            #
 #                                        #
@@ -52,7 +52,7 @@ port = "8081"                            #
 days_job_expire = 1                      #
 #                                        #
 # Data limit                             #
-data_limit = '1 Mb'                      #
+data_limit = "5 Mb"                      #
 #                                        #
 # Timers (msec)                          #
 time_restart_job_checks = 5000           #
@@ -158,17 +158,18 @@ class _Default(object):
 
 
 def __init_plugin__(app=None):
-    '''
+    """
     Add an entry to the PyMOL "Plugin" menu
-    '''
+    """
     from pymol.plugins import addmenuitemqt
-    addmenuitemqt('PyMOL KVFinder-web Tools', run_plugin_gui)
+
+    addmenuitemqt("PyMOL KVFinder-web Tools", run_plugin_gui)
 
 
 def run_plugin_gui():
-    '''
+    """
     Open PyMOL KVFinder-web Tools dialog
-    '''
+    """
     global dialog
 
     if dialog is None:
@@ -195,7 +196,7 @@ class PyMOLKVFinderWebTools(QMainWindow):
         Parameters
         ----------
         server: str
-            KVFinder-web service address (Default: http://parkvfinder.cnpem.br). Users may set this variable to a locally configured KVFinder-web service by changing 'server' global variable.
+            KVFinder-web service address (Default: http://kvfinder-web.cnpem.br). Users may set this variable to a locally configured KVFinder-web service by changing 'server' global variable.
         port: str
             Server port to communicate with KVFinder-web service (Default: 8081)
         """
@@ -224,7 +225,7 @@ class PyMOLKVFinderWebTools(QMainWindow):
         self.set_server_status(status)
 
         # Create ./KVFinder-web directory for jobs
-        jobs_dir = os.path.join(os.path.expanduser('~'), '.KVFinder-web')
+        jobs_dir = os.path.join(os.path.expanduser("~"), ".KVFinder-web")
         try:
             os.mkdir(jobs_dir)
         except FileExistsError:
@@ -254,7 +255,7 @@ class PyMOLKVFinderWebTools(QMainWindow):
         from PyQt5.uic import loadUi
 
         # populate the QMainWindow from our *.ui file
-        uifile = os.path.join(os.path.dirname(__file__), 'PyMOL-KVFinder-web-tools.ui')
+        uifile = os.path.join(os.path.dirname(__file__), "PyMOL-KVFinder-web-tools.ui")
         loadUi(uifile, self)
 
         # ScrollBars binded to QListWidgets in Descriptors
@@ -297,8 +298,16 @@ class PyMOLKVFinderWebTools(QMainWindow):
         # Visualization
         self.button_browse_results.clicked.connect(self.select_results_file)
         self.button_load_results.clicked.connect(self.load_results)
-        self.volume_list.itemSelectionChanged.connect(lambda list1=self.volume_list, list2=self.area_list: self.show_cavities(list1, list2))
-        self.area_list.itemSelectionChanged.connect(lambda list1=self.area_list, list2=self.volume_list: self.show_cavities(list1, list2))
+        self.volume_list.itemSelectionChanged.connect(
+            lambda list1=self.volume_list, list2=self.area_list: self.show_cavities(
+                list1, list2
+            )
+        )
+        self.area_list.itemSelectionChanged.connect(
+            lambda list1=self.area_list, list2=self.volume_list: self.show_cavities(
+                list1, list2
+            )
+        )
         self.residues_list.itemSelectionChanged.connect(self.show_residues)
 
     def run(self) -> None:
@@ -317,14 +326,16 @@ class PyMOLKVFinderWebTools(QMainWindow):
         else:
             return
 
-        print('\n[==> Submitting job to KVFinder-web service ...')
+        print("\n[==> Submitting job to KVFinder-web service ...")
 
         # Post request
         try:
             # Prepare request
-            url = QUrl(f'{self.server}/create')
+            url = QUrl(f"{self.server}/create")
             request = QtNetwork.QNetworkRequest(url)
-            request.setHeader(QtNetwork.QNetworkRequest.ContentTypeHeader, "application/json")
+            request.setHeader(
+                QtNetwork.QNetworkRequest.ContentTypeHeader, "application/json"
+            )
 
             # Prepare data
             data = QJsonDocument(self.job.input)
@@ -350,29 +361,26 @@ class PyMOLKVFinderWebTools(QMainWindow):
 
         # Handle Post Response
         if er == QtNetwork.QNetworkReply.NoError:
-
-            reply = json.loads(str(self.reply.readAll(), 'utf-8'))
+            reply = json.loads(str(self.reply.readAll(), "utf-8"))
 
             # Save job id
-            self.job.id = reply['id']
+            self.job.id = reply["id"]
 
             # Results not available
-            if 'output' not in reply.keys():
-
+            if "output" not in reply.keys():
                 if verbosity in [1, 3]:
-                    print('> Job successfully submitted to KVFinder-web service!')
+                    print("> Job successfully submitted to KVFinder-web service!")
 
                 # Message to user
                 message = Message(
-                    "Job successfully submitted to KVFinder-web service!",
-                    self.job.id
+                    "Job successfully submitted to KVFinder-web service!", self.job.id
                 )
                 message.exec_()
 
                 # Save job file
-                self.job.status = 'queued'
+                self.job.status = "queued"
                 self.job.save(self.job.id)
-                print(f'> Job ID: {self.job.id}')
+                print(f"> Job ID: {self.job.id}")
 
                 # Add Job ID to Results tab
                 self.available_jobs.clear()
@@ -384,16 +392,15 @@ class PyMOLKVFinderWebTools(QMainWindow):
                 status = reply["status"]
 
                 # handle job completed
-                if status == 'completed':
-
+                if status == "completed":
                     if verbosity in [1, 3]:
-                        print('> Job already completed in KVFinder-web service!')
+                        print("> Job already completed in KVFinder-web service!")
 
                     # Message to user
                     message = Message(
                         "Job already completed in KVFinder-web service!\nDisplaying results ...",
                         self.job.id,
-                        status
+                        status,
                     )
                     message.exec_()
 
@@ -409,7 +416,10 @@ class PyMOLKVFinderWebTools(QMainWindow):
                     self.job.save(self.job.id)
 
                     # Add Job ID to Results tab
-                    if self.job.id not in [self.available_jobs.itemText(i) for i in range(self.available_jobs.count())]:
+                    if self.job.id not in [
+                        self.available_jobs.itemText(i)
+                        for i in range(self.available_jobs.count())
+                    ]:
                         self.available_jobs.addItem(self.job.id)
                     self.available_jobs.setCurrentText(self.job.id)
 
@@ -420,16 +430,15 @@ class PyMOLKVFinderWebTools(QMainWindow):
                     self.tabs.setCurrentIndex(2)
 
                 # handle job not completed
-                elif status == 'running' or status == 'queued':
-
+                elif status == "running" or status == "queued":
                     if verbosity in [1, 3]:
-                        print('> Job already submitted to KVFinder-web service!')
+                        print("> Job already submitted to KVFinder-web service!")
 
                     # Message to user
                     message = Message(
                         "Job already submitted to KVFinder-web service!",
                         self.job.id,
-                        status
+                        status,
                     )
                     message.exec_()
 
@@ -441,11 +450,13 @@ class PyMOLKVFinderWebTools(QMainWindow):
 
             # Message to user
             if verbosity in [1, 3]:
-                print("\n\033[93mWarning:\033[0m KVFinder-web service is Offline! Try again later!\n")
+                print(
+                    "\n\033[93mWarning:\033[0m KVFinder-web service is Offline! Try again later!\n"
+                )
             QMessageBox.critical(
                 self,
                 "Job Submission",
-                "KVFinder-web service is Offline!\n\nTry again later!"
+                "KVFinder-web service is Offline!\n\nTry again later!",
             )
 
         elif er == QtNetwork.QNetworkReply.UnknownContentError:
@@ -456,23 +467,42 @@ class PyMOLKVFinderWebTools(QMainWindow):
 
             # Message to user
             if verbosity in [1, 3]:
-                print(f"\n\033[91mError:\033[0mJob exceedes the maximum payload of {data_limit} on KVFinder-web service!\n")
+                print(
+                    f"\n\033[91mError:\033[0mJob exceedes the maximum payload of {data_limit} on KVFinder-web service!\n"
+                )
             QMessageBox.critical(
                 self,
                 "Job Submission",
-                f"Job exceedes the maximum payload of {data_limit} on KVFinder-web service!"
+                f"Job exceedes the maximum payload of {data_limit} on KVFinder-web service!",
+            )
+
+        elif er == QtNetwork.QNetworkReply.TimeoutError:
+            from PyQt5.QtWidgets import QMessageBox
+
+            # Set server status in GUI
+            self.server_down()
+
+            # Message to user
+            if verbosity in [1, 3]:
+                print(
+                    "\n\033[93mWarning:\033[0m The connection to the KVFinder-web server timed out!\n"
+                )
+            QMessageBox.critical(
+                self,
+                "Job Submission",
+                "The connection to the KVFinder-web server timed out!\n\nCheck your connection and KVFinder-web server status!",
             )
 
         else:
-            reply = str(self.reply.readAll(), 'utf-8')
+            reply = str(self.reply.readAll(), "utf-8")
             # Message to user
             if verbosity in [1, 3]:
-                print(f'\n\033[91mError {er}\033[0m\n\n')
+                print(f"\n\033[91mError {er}\033[0m\n\n")
             message = Message(
-                f'Error {er}!',
+                f"Error {er}!",
                 job_id=None,
                 status=None,
-                notification=f'{self.reply.errorString()}\n{reply}\n',
+                notification=f"{self.reply.errorString()}\n{reply}\n",
             )
             message.exec_()
 
@@ -553,60 +583,140 @@ class PyMOLKVFinderWebTools(QMainWindow):
 
         # Get positions of grid vertices
         # P1
-        x1 = -min_x * cos(angle2) - (-min_y) * sin(angle1) * sin(angle2) + (-min_z) * cos(angle1) * sin(angle2) + x
+        x1 = (
+            -min_x * cos(angle2)
+            - (-min_y) * sin(angle1) * sin(angle2)
+            + (-min_z) * cos(angle1) * sin(angle2)
+            + x
+        )
 
         y1 = -min_y * cos(angle1) + (-min_z) * sin(angle1) + y
 
-        z1 = min_x * sin(angle2) + min_y * sin(angle1) * cos(angle2) - min_z * cos(angle1) * cos(angle2) + z
+        z1 = (
+            min_x * sin(angle2)
+            + min_y * sin(angle1) * cos(angle2)
+            - min_z * cos(angle1) * cos(angle2)
+            + z
+        )
 
         # P2
-        x2 = max_x * cos(angle2) - (-min_y) * sin(angle1) * sin(angle2) + (-min_z) * cos(angle1) * sin(angle2) + x
+        x2 = (
+            max_x * cos(angle2)
+            - (-min_y) * sin(angle1) * sin(angle2)
+            + (-min_z) * cos(angle1) * sin(angle2)
+            + x
+        )
 
         y2 = (-min_y) * cos(angle1) + (-min_z) * sin(angle1) + y
 
-        z2 = (-max_x) * sin(angle2) - (-min_y) * sin(angle1) * cos(angle2) + (-min_z) * cos(angle1) * cos(angle2) + z
+        z2 = (
+            (-max_x) * sin(angle2)
+            - (-min_y) * sin(angle1) * cos(angle2)
+            + (-min_z) * cos(angle1) * cos(angle2)
+            + z
+        )
 
         # P3
-        x3 = (-min_x) * cos(angle2) - max_y * sin(angle1) * sin(angle2) + (-min_z) * cos(angle1) * sin(angle2) + x
+        x3 = (
+            (-min_x) * cos(angle2)
+            - max_y * sin(angle1) * sin(angle2)
+            + (-min_z) * cos(angle1) * sin(angle2)
+            + x
+        )
 
         y3 = max_y * cos(angle1) + (-min_z) * sin(angle1) + y
 
-        z3 = -(-min_x) * sin(angle2) - max_y * sin(angle1) * cos(angle2) + (-min_z) * cos(angle1) * cos(angle2) + z
+        z3 = (
+            -(-min_x) * sin(angle2)
+            - max_y * sin(angle1) * cos(angle2)
+            + (-min_z) * cos(angle1) * cos(angle2)
+            + z
+        )
 
         # P4
-        x4 = (-min_x) * cos(angle2) - (-min_y) * sin(angle1) * sin(angle2) + max_z * cos(angle1) * sin(angle2) + x
+        x4 = (
+            (-min_x) * cos(angle2)
+            - (-min_y) * sin(angle1) * sin(angle2)
+            + max_z * cos(angle1) * sin(angle2)
+            + x
+        )
 
         y4 = (-min_y) * cos(angle1) + max_z * sin(angle1) + y
 
-        z4 = -(-min_x) * sin(angle2) - (-min_y) * sin(angle1) * cos(angle2) + max_z * cos(angle1) * cos(angle2) + z
+        z4 = (
+            -(-min_x) * sin(angle2)
+            - (-min_y) * sin(angle1) * cos(angle2)
+            + max_z * cos(angle1) * cos(angle2)
+            + z
+        )
 
         # P5
-        x5 = max_x * cos(angle2) - max_y * sin(angle1) * sin(angle2) + (-min_z) * cos(angle1) * sin(angle2) + x
+        x5 = (
+            max_x * cos(angle2)
+            - max_y * sin(angle1) * sin(angle2)
+            + (-min_z) * cos(angle1) * sin(angle2)
+            + x
+        )
 
         y5 = max_y * cos(angle1) + (-min_z) * sin(angle1) + y
 
-        z5 = (-max_x) * sin(angle2) - max_y * sin(angle1) * cos(angle2) + (-min_z) * cos(angle1) * cos(angle2) + z
+        z5 = (
+            (-max_x) * sin(angle2)
+            - max_y * sin(angle1) * cos(angle2)
+            + (-min_z) * cos(angle1) * cos(angle2)
+            + z
+        )
 
         # P6
-        x6 = max_x * cos(angle2) - (-min_y) * sin(angle1) * sin(angle2) + max_z * cos(angle1) * sin(angle2) + x
+        x6 = (
+            max_x * cos(angle2)
+            - (-min_y) * sin(angle1) * sin(angle2)
+            + max_z * cos(angle1) * sin(angle2)
+            + x
+        )
 
         y6 = (-min_y) * cos(angle1) + max_z * sin(angle1) + y
 
-        z6 = (-max_x) * sin(angle2) - (-min_y) * sin(angle1) * cos(angle2) + max_z * cos(angle1) * cos(angle2) + z
+        z6 = (
+            (-max_x) * sin(angle2)
+            - (-min_y) * sin(angle1) * cos(angle2)
+            + max_z * cos(angle1) * cos(angle2)
+            + z
+        )
 
         # P7
-        x7 = (-min_x) * cos(angle2) - max_y * sin(angle1) * sin(angle2) + max_z * cos(angle1) * sin(angle2) + x
+        x7 = (
+            (-min_x) * cos(angle2)
+            - max_y * sin(angle1) * sin(angle2)
+            + max_z * cos(angle1) * sin(angle2)
+            + x
+        )
 
         y7 = max_y * cos(angle1) + max_z * sin(angle1) + y
 
-        z7 = -(-min_x) * sin(angle2) - max_y * sin(angle1) * cos(angle2) + max_z * cos(angle1) * cos(angle2) + z
+        z7 = (
+            -(-min_x) * sin(angle2)
+            - max_y * sin(angle1) * cos(angle2)
+            + max_z * cos(angle1) * cos(angle2)
+            + z
+        )
 
         # P8
-        x8 = max_x * cos(angle2) - max_y * sin(angle1) * sin(angle2) + max_z * cos(angle1) * sin(angle2) + x
+        x8 = (
+            max_x * cos(angle2)
+            - max_y * sin(angle1) * sin(angle2)
+            + max_z * cos(angle1) * sin(angle2)
+            + x
+        )
 
         y8 = max_y * cos(angle1) + max_z * sin(angle1) + y
 
-        z8 = (-max_x) * sin(angle2) - max_y * sin(angle1) * cos(angle2) + max_z * cos(angle1) * cos(angle2) + z
+        z8 = (
+            (-max_x) * sin(angle2)
+            - max_y * sin(angle1) * cos(angle2)
+            + max_z * cos(angle1) * cos(angle2)
+            + z
+        )
 
         # Create box object
         if "grid" in cmd.get_names("objects"):
@@ -640,16 +750,16 @@ class PyMOLKVFinderWebTools(QMainWindow):
         cmd.bond("vertices", "vertices")
         cmd.select("vertices", "(name v7,v8)")
         cmd.bond("vertices", "vertices")
-        cmd.pseudoatom("grid", name="v1x", pos=[x1, y1, z1], color='white')
-        cmd.pseudoatom("grid", name="v2x", pos=[x2, y2, z2], color='white')
+        cmd.pseudoatom("grid", name="v1x", pos=[x1, y1, z1], color="white")
+        cmd.pseudoatom("grid", name="v2x", pos=[x2, y2, z2], color="white")
         cmd.select("vertices", "(name v1x,v2x)")
         cmd.bond("vertices", "vertices")
-        cmd.pseudoatom("grid", name="v1y", pos=[x1, y1, z1], color='white')
-        cmd.pseudoatom("grid", name="v3y", pos=[x3, y3, z3], color='white')
+        cmd.pseudoatom("grid", name="v1y", pos=[x1, y1, z1], color="white")
+        cmd.pseudoatom("grid", name="v3y", pos=[x3, y3, z3], color="white")
         cmd.select("vertices", "(name v1y,v3y)")
         cmd.bond("vertices", "vertices")
-        cmd.pseudoatom("grid", name="v4z", pos=[x4, y4, z4], color='white')
-        cmd.pseudoatom("grid", name="v1z", pos=[x1, y1, z1], color='white')
+        cmd.pseudoatom("grid", name="v4z", pos=[x4, y4, z4], color="white")
+        cmd.pseudoatom("grid", name="v1z", pos=[x1, y1, z1], color="white")
         cmd.select("vertices", "(name v1z,v4z)")
         cmd.bond("vertices", "vertices")
         cmd.delete("vertices")
@@ -736,7 +846,15 @@ class PyMOLKVFinderWebTools(QMainWindow):
 
         combo_box.clear()
         for item in cmd.get_names("all"):
-            if cmd.get_type(item) == "object:molecule" and item != "box" and item != "grid" and item != "cavities" and item != "residues" and item[-16:] != ".KVFinder.output" and item != "target_exclusive":
+            if (
+                cmd.get_type(item) == "object:molecule"
+                and item != "box"
+                and item != "grid"
+                and item != "cavities"
+                and item != "residues"
+                and item[-16:] != ".KVFinder.output"
+                and item != "target_exclusive"
+            ):
                 combo_box.addItem(item)
 
         return
@@ -750,7 +868,9 @@ class PyMOLKVFinderWebTools(QMainWindow):
         from PyQt5.QtWidgets import QFileDialog
         from PyQt5.QtCore import QDir
 
-        fname = QFileDialog.getExistingDirectory(caption='Choose Output Directory', directory=os.getcwd())
+        fname = QFileDialog.getExistingDirectory(
+            caption="Choose Output Directory", directory=os.getcwd()
+        )
 
         if fname:
             fname = QDir.toNativeSeparators(fname)
@@ -834,60 +954,168 @@ class PyMOLKVFinderWebTools(QMainWindow):
 
         # Get positions of box vertices
         # P1
-        x1 = -self.min_x.value() * cos(angle2) - (-self.min_y.value()) * sin(angle1) * sin(angle2) + (-self.min_z.value()) * cos(angle1) * sin(angle2) + self.x
+        x1 = (
+            -self.min_x.value() * cos(angle2)
+            - (-self.min_y.value()) * sin(angle1) * sin(angle2)
+            + (-self.min_z.value()) * cos(angle1) * sin(angle2)
+            + self.x
+        )
 
-        y1 = -self.min_y.value() * cos(angle1) + (-self.min_z.value()) * sin(angle1) + self.y
+        y1 = (
+            -self.min_y.value() * cos(angle1)
+            + (-self.min_z.value()) * sin(angle1)
+            + self.y
+        )
 
-        z1 = self.min_x.value() * sin(angle2) + self.min_y.value() * sin(angle1) * cos(angle2) - self.min_z.value() * cos(angle1) * cos(angle2) + self.z
+        z1 = (
+            self.min_x.value() * sin(angle2)
+            + self.min_y.value() * sin(angle1) * cos(angle2)
+            - self.min_z.value() * cos(angle1) * cos(angle2)
+            + self.z
+        )
 
         # P2
-        x2 = self.max_x.value() * cos(angle2) - (-self.min_y.value()) * sin(angle1) * sin(angle2) + (-self.min_z.value()) * cos(angle1) * sin(angle2) + self.x
+        x2 = (
+            self.max_x.value() * cos(angle2)
+            - (-self.min_y.value()) * sin(angle1) * sin(angle2)
+            + (-self.min_z.value()) * cos(angle1) * sin(angle2)
+            + self.x
+        )
 
-        y2 = (-self.min_y.value()) * cos(angle1) + (-self.min_z.value()) * sin(angle1) + self.y
+        y2 = (
+            (-self.min_y.value()) * cos(angle1)
+            + (-self.min_z.value()) * sin(angle1)
+            + self.y
+        )
 
-        z2 = (-self.max_x.value()) * sin(angle2) - (-self.min_y.value()) * sin(angle1) * cos(angle2) + (-self.min_z.value()) * cos(angle1) * cos(angle2) + self.z
+        z2 = (
+            (-self.max_x.value()) * sin(angle2)
+            - (-self.min_y.value()) * sin(angle1) * cos(angle2)
+            + (-self.min_z.value()) * cos(angle1) * cos(angle2)
+            + self.z
+        )
 
         # P3
-        x3 = (-self.min_x.value()) * cos(angle2) - self.max_y.value() * sin(angle1) * sin(angle2) + (-self.min_z.value()) * cos(angle1) * sin(angle2) + self.x
+        x3 = (
+            (-self.min_x.value()) * cos(angle2)
+            - self.max_y.value() * sin(angle1) * sin(angle2)
+            + (-self.min_z.value()) * cos(angle1) * sin(angle2)
+            + self.x
+        )
 
-        y3 = self.max_y.value() * cos(angle1) + (-self.min_z.value()) * sin(angle1) + self.y
+        y3 = (
+            self.max_y.value() * cos(angle1)
+            + (-self.min_z.value()) * sin(angle1)
+            + self.y
+        )
 
-        z3 = -(-self.min_x.value()) * sin(angle2) - self.max_y.value() * sin(angle1) * cos(angle2) + (-self.min_z.value()) * cos(angle1) * cos(angle2) + self.z
+        z3 = (
+            -(-self.min_x.value()) * sin(angle2)
+            - self.max_y.value() * sin(angle1) * cos(angle2)
+            + (-self.min_z.value()) * cos(angle1) * cos(angle2)
+            + self.z
+        )
 
         # P4
-        x4 = (-self.min_x.value()) * cos(angle2) - (-self.min_y.value()) * sin(angle1) * sin(angle2) + self.max_z.value() * cos(angle1) * sin(angle2) + self.x
+        x4 = (
+            (-self.min_x.value()) * cos(angle2)
+            - (-self.min_y.value()) * sin(angle1) * sin(angle2)
+            + self.max_z.value() * cos(angle1) * sin(angle2)
+            + self.x
+        )
 
-        y4 = (-self.min_y.value()) * cos(angle1) + self.max_z.value() * sin(angle1) + self.y
+        y4 = (
+            (-self.min_y.value()) * cos(angle1)
+            + self.max_z.value() * sin(angle1)
+            + self.y
+        )
 
-        z4 = -(-self.min_x.value()) * sin(angle2) - (-self.min_y.value()) * sin(angle1) * cos(angle2) + self.max_z.value() * cos(angle1) * cos(angle2) + self.z
+        z4 = (
+            -(-self.min_x.value()) * sin(angle2)
+            - (-self.min_y.value()) * sin(angle1) * cos(angle2)
+            + self.max_z.value() * cos(angle1) * cos(angle2)
+            + self.z
+        )
 
         # P5
-        x5 = self.max_x.value() * cos(angle2) - self.max_y.value() * sin(angle1) * sin(angle2) + (-self.min_z.value()) * cos(angle1) * sin(angle2) + self.x
+        x5 = (
+            self.max_x.value() * cos(angle2)
+            - self.max_y.value() * sin(angle1) * sin(angle2)
+            + (-self.min_z.value()) * cos(angle1) * sin(angle2)
+            + self.x
+        )
 
-        y5 = self.max_y.value() * cos(angle1) + (-self.min_z.value()) * sin(angle1) + self.y
+        y5 = (
+            self.max_y.value() * cos(angle1)
+            + (-self.min_z.value()) * sin(angle1)
+            + self.y
+        )
 
-        z5 = (-self.max_x.value()) * sin(angle2) - self.max_y.value() * sin(angle1) * cos(angle2) + (-self.min_z.value()) * cos(angle1) * cos(angle2) + self.z
+        z5 = (
+            (-self.max_x.value()) * sin(angle2)
+            - self.max_y.value() * sin(angle1) * cos(angle2)
+            + (-self.min_z.value()) * cos(angle1) * cos(angle2)
+            + self.z
+        )
 
         # P6
-        x6 = self.max_x.value() * cos(angle2) - (-self.min_y.value()) * sin(angle1) * sin(angle2) + self.max_z.value() * cos(angle1) * sin(angle2) + self.x
+        x6 = (
+            self.max_x.value() * cos(angle2)
+            - (-self.min_y.value()) * sin(angle1) * sin(angle2)
+            + self.max_z.value() * cos(angle1) * sin(angle2)
+            + self.x
+        )
 
-        y6 = (-self.min_y.value()) * cos(angle1) + self.max_z.value() * sin(angle1) + self.y
+        y6 = (
+            (-self.min_y.value()) * cos(angle1)
+            + self.max_z.value() * sin(angle1)
+            + self.y
+        )
 
-        z6 = (-self.max_x.value()) * sin(angle2) - (-self.min_y.value()) * sin(angle1) * cos(angle2) + self.max_z.value() * cos(angle1) * cos(angle2) + self.z
+        z6 = (
+            (-self.max_x.value()) * sin(angle2)
+            - (-self.min_y.value()) * sin(angle1) * cos(angle2)
+            + self.max_z.value() * cos(angle1) * cos(angle2)
+            + self.z
+        )
 
         # P7
-        x7 = (-self.min_x.value()) * cos(angle2) - self.max_y.value() * sin(angle1) * sin(angle2) + self.max_z.value() * cos(angle1) * sin(angle2) + self.x
+        x7 = (
+            (-self.min_x.value()) * cos(angle2)
+            - self.max_y.value() * sin(angle1) * sin(angle2)
+            + self.max_z.value() * cos(angle1) * sin(angle2)
+            + self.x
+        )
 
-        y7 = self.max_y.value() * cos(angle1) + self.max_z.value() * sin(angle1) + self.y
+        y7 = (
+            self.max_y.value() * cos(angle1) + self.max_z.value() * sin(angle1) + self.y
+        )
 
-        z7 = -(-self.min_x.value()) * sin(angle2) - self.max_y.value() * sin(angle1) * cos(angle2) + self.max_z.value() * cos(angle1) * cos(angle2) + self.z
+        z7 = (
+            -(-self.min_x.value()) * sin(angle2)
+            - self.max_y.value() * sin(angle1) * cos(angle2)
+            + self.max_z.value() * cos(angle1) * cos(angle2)
+            + self.z
+        )
 
         # P8
-        x8 = self.max_x.value() * cos(angle2) - self.max_y.value() * sin(angle1) * sin(angle2) + self.max_z.value() * cos(angle1) * sin(angle2) + self.x
+        x8 = (
+            self.max_x.value() * cos(angle2)
+            - self.max_y.value() * sin(angle1) * sin(angle2)
+            + self.max_z.value() * cos(angle1) * sin(angle2)
+            + self.x
+        )
 
-        y8 = self.max_y.value() * cos(angle1) + self.max_z.value() * sin(angle1) + self.y
+        y8 = (
+            self.max_y.value() * cos(angle1) + self.max_z.value() * sin(angle1) + self.y
+        )
 
-        z8 = (-self.max_x.value()) * sin(angle2) - self.max_y.value() * sin(angle1) * cos(angle2) + self.max_z.value() * cos(angle1) * cos(angle2) + self.z
+        z8 = (
+            (-self.max_x.value()) * sin(angle2)
+            - self.max_y.value() * sin(angle1) * cos(angle2)
+            + self.max_z.value() * cos(angle1) * cos(angle2)
+            + self.z
+        )
 
         # Create box object
         pymol.stored.list = []
@@ -901,7 +1129,21 @@ class PyMOLKVFinderWebTools(QMainWindow):
                 at_c = item[1]
                 cmd.set_color(at_name + "color", cmd.get_color_tuple(at_c))
         else:
-            for at_name in ["v2", "v3", "v4", "v5", "v6", "v7", "v8", "v1x", "v1y", "v1z", "v2x", "v3y", "v4z"]:
+            for at_name in [
+                "v2",
+                "v3",
+                "v4",
+                "v5",
+                "v6",
+                "v7",
+                "v8",
+                "v1x",
+                "v1y",
+                "v1z",
+                "v2x",
+                "v3y",
+                "v4z",
+            ]:
                 cmd.set_color(at_name + "color", [0.86, 0.86, 0.86])
 
         # Create vertices
@@ -932,16 +1174,16 @@ class PyMOLKVFinderWebTools(QMainWindow):
         cmd.bond("vertices", "vertices")
         cmd.select("vertices", "(name v7,v8)")
         cmd.bond("vertices", "vertices")
-        cmd.pseudoatom("box", name="v1x", pos=[x1, y1, z1], color='red')
-        cmd.pseudoatom("box", name="v2x", pos=[x2, y2, z2], color='red')
+        cmd.pseudoatom("box", name="v1x", pos=[x1, y1, z1], color="red")
+        cmd.pseudoatom("box", name="v2x", pos=[x2, y2, z2], color="red")
         cmd.select("vertices", "(name v1x,v2x)")
         cmd.bond("vertices", "vertices")
-        cmd.pseudoatom("box", name="v1y", pos=[x1, y1, z1], color='forest')
-        cmd.pseudoatom("box", name="v3y", pos=[x3, y3, z3], color='forest')
+        cmd.pseudoatom("box", name="v1y", pos=[x1, y1, z1], color="forest")
+        cmd.pseudoatom("box", name="v3y", pos=[x3, y3, z3], color="forest")
         cmd.select("vertices", "(name v1y,v3y)")
         cmd.bond("vertices", "vertices")
-        cmd.pseudoatom("box", name="v4z", pos=[x4, y4, z4], color='blue')
-        cmd.pseudoatom("box", name="v1z", pos=[x1, y1, z1], color='blue')
+        cmd.pseudoatom("box", name="v4z", pos=[x4, y4, z4], color="blue")
+        cmd.pseudoatom("box", name="v1z", pos=[x1, y1, z1], color="blue")
         cmd.select("vertices", "(name v1z,v4z)")
         cmd.bond("vertices", "vertices")
         cmd.delete("vertices")
@@ -1002,7 +1244,16 @@ class PyMOLKVFinderWebTools(QMainWindow):
             # Get dimensions of selected residues
             ([min_x, min_y, min_z], [max_x, max_y, max_z]) = cmd.get_extent("sele")
 
-            if self.min_x.value() != self.min_x_set or self.max_x.value() != self.max_x_set or self.min_y.value() != self.min_y_set or self.max_y.value() != self.max_y_set or self.min_z.value() != self.min_z_set or self.max_z.value() != self.max_z_set or self.angle1.value() != self.angle1_set or self.angle2.value() != self.angle2_set:
+            if (
+                self.min_x.value() != self.min_x_set
+                or self.max_x.value() != self.max_x_set
+                or self.min_y.value() != self.min_y_set
+                or self.max_y.value() != self.max_y_set
+                or self.min_z.value() != self.min_z_set
+                or self.max_z.value() != self.max_z_set
+                or self.angle1.value() != self.angle1_set
+                or self.angle2.value() != self.angle2_set
+            ):
                 self.min_x_set = self.min_x.value()
                 self.max_x_set = self.max_x.value()
                 self.min_y_set = self.min_y.value()
@@ -1019,18 +1270,51 @@ class PyMOLKVFinderWebTools(QMainWindow):
                 self.z = (min_z + max_z) / 2
 
                 # Set background box values
-                self.min_x_set = round(self.x - (min_x - self.padding.value()), 1) + self.min_x.value() - self.min_x_set
-                self.max_x_set = round((max_x + self.padding.value()) - self.x, 1) + self.max_x.value() - self.max_x_set
-                self.min_y_set = round(self.y - (min_y - self.padding.value()), 1) + self.min_y.value() - self.min_y_set
-                self.max_y_set = round((max_y + self.padding.value()) - self.y, 1) + self.max_y.value() - self.max_y_set
-                self.min_z_set = round(self.z - (min_z - self.padding.value()), 1) + self.min_z.value() - self.min_z_set
-                self.max_z_set = round((max_z + self.padding.value()) - self.z, 1) + self.max_z.value() - self.max_z_set
+                self.min_x_set = (
+                    round(self.x - (min_x - self.padding.value()), 1)
+                    + self.min_x.value()
+                    - self.min_x_set
+                )
+                self.max_x_set = (
+                    round((max_x + self.padding.value()) - self.x, 1)
+                    + self.max_x.value()
+                    - self.max_x_set
+                )
+                self.min_y_set = (
+                    round(self.y - (min_y - self.padding.value()), 1)
+                    + self.min_y.value()
+                    - self.min_y_set
+                )
+                self.max_y_set = (
+                    round((max_y + self.padding.value()) - self.y, 1)
+                    + self.max_y.value()
+                    - self.max_y_set
+                )
+                self.min_z_set = (
+                    round(self.z - (min_z - self.padding.value()), 1)
+                    + self.min_z.value()
+                    - self.min_z_set
+                )
+                self.max_z_set = (
+                    round((max_z + self.padding.value()) - self.z, 1)
+                    + self.max_z.value()
+                    - self.max_z_set
+                )
                 self.angle1_set = 0 + self.angle1.value()
                 self.angle2_set = 0 + self.angle2.value()
                 self.padding_set = self.padding.value()
         # Not provided a selection
         else:
-            if self.min_x.value() != self.min_x_set or self.max_x.value() != self.max_x_set or self.min_y.value() != self.min_y_set or self.max_y.value() != self.max_y_set or self.min_z.value() != self.min_z_set or self.max_z.value() != self.max_z_set or self.angle1.value() != self.angle1_set or self.angle2.value() != self.angle2_set:
+            if (
+                self.min_x.value() != self.min_x_set
+                or self.max_x.value() != self.max_x_set
+                or self.min_y.value() != self.min_y_set
+                or self.max_y.value() != self.max_y_set
+                or self.min_z.value() != self.min_z_set
+                or self.max_z.value() != self.max_z_set
+                or self.angle1.value() != self.angle1_set
+                or self.angle2.value() != self.angle2_set
+            ):
                 self.min_x_set = self.min_x.value()
                 self.max_x_set = self.max_x.value()
                 self.min_y_set = self.min_y.value()
@@ -1085,7 +1369,12 @@ class PyMOLKVFinderWebTools(QMainWindow):
         This method displays a help message to the user, explaining the variables shown on the Box adjustment frame.
         """
         from PyQt5 import QtWidgets, QtCore
-        text = QtCore.QCoreApplication.translate("KVFinderWeb", u"<html><head/><body><p align=\"justify\"><span style=\" font-weight:600; text-decoration: underline;\">Box Adjustment mode:</span></p><p align=\"justify\">- Create a selection (optional);</p><p align=\"justify\">- Define a <span style=\" font-weight:600;\">Padding</span> (optional);</p><p align=\"justify\">- Click on <span style=\" font-weight:600;\">Draw Box</span> button.</p><p align=\"justify\"><br/><span style=\"text-decoration: underline;\">Customize your <span style=\" font-weight:600;\">box</span></span>:</p><p align=\"justify\">- Change one item at a time (e.g. <span style=\" font-style:italic;\">Padding</span>, <span style=\" font-style:italic;\">Minimum X</span>, <span style=\" font-style:italic;\">Maximum X</span>, ...);</p><p align=\"justify\">- Click on <span style=\" font-weight:600;\">Redraw Box</span> button.<br/></p><p><span style=\" font-weight:400; text-decoration: underline;\">Delete </span><span style=\" text-decoration: underline;\">box</span><span style=\" font-weight:400; text-decoration: underline;\">:</span></p><p align=\"justify\">- Click on <span style=\" font-weight:600;\">Delete Box</span> button.<br/></p><p align=\"justify\"><span style=\"text-decoration: underline;\">Colors of the <span style=\" font-weight:600;\">box</span> object:</span></p><p align=\"justify\">- <span style=\" font-weight:600;\">Red</span> corresponds to <span style=\" font-weight:600;\">X</span> axis;</p><p align=\"justify\">- <span style=\" font-weight:600;\">Green</span> corresponds to <span style=\" font-weight:600;\">Y</span> axis;</p><p align=\"justify\">- <span style=\" font-weight:600;\">Blue</span> corresponds to <span style=\" font-weight:600;\">Z</span> axis.</p></body></html>", None)
+
+        text = QtCore.QCoreApplication.translate(
+            "KVFinderWeb",
+            '<html><head/><body><p align="justify"><span style=" font-weight:600; text-decoration: underline;">Box Adjustment mode:</span></p><p align="justify">- Create a selection (optional);</p><p align="justify">- Define a <span style=" font-weight:600;">Padding</span> (optional);</p><p align="justify">- Click on <span style=" font-weight:600;">Draw Box</span> button.</p><p align="justify"><br/><span style="text-decoration: underline;">Customize your <span style=" font-weight:600;">box</span></span>:</p><p align="justify">- Change one item at a time (e.g. <span style=" font-style:italic;">Padding</span>, <span style=" font-style:italic;">Minimum X</span>, <span style=" font-style:italic;">Maximum X</span>, ...);</p><p align="justify">- Click on <span style=" font-weight:600;">Redraw Box</span> button.<br/></p><p><span style=" font-weight:400; text-decoration: underline;">Delete </span><span style=" text-decoration: underline;">box</span><span style=" font-weight:400; text-decoration: underline;">:</span></p><p align="justify">- Click on <span style=" font-weight:600;">Delete Box</span> button.<br/></p><p align="justify"><span style="text-decoration: underline;">Colors of the <span style=" font-weight:600;">box</span> object:</span></p><p align="justify">- <span style=" font-weight:600;">Red</span> corresponds to <span style=" font-weight:600;">X</span> axis;</p><p align="justify">- <span style=" font-weight:600;">Green</span> corresponds to <span style=" font-weight:600;">Y</span> axis;</p><p align="justify">- <span style=" font-weight:600;">Blue</span> corresponds to <span style=" font-weight:600;">Z</span> axis.</p></body></html>',
+            None,
+        )
         help_information = QtWidgets.QMessageBox(self)
         help_information.setText(text)
         help_information.setWindowTitle("Help")
@@ -1107,81 +1396,91 @@ class PyMOLKVFinderWebTools(QMainWindow):
         parameters = dict()
 
         # title
-        parameters['title'] = 'KVFinder-web job file'
+        parameters["title"] = "KVFinder-web job file"
 
         # status
-        parameters['status'] = 'submitting'
+        parameters["status"] = "submitting"
 
         # files
-        parameters['files'] = dict()
+        parameters["files"] = dict()
         # pdb
-        if self.input.currentText() != '':
-            parameters['files']['pdb'] = self.input.currentText()
+        if self.input.currentText() != "":
+            parameters["files"]["pdb"] = self.input.currentText()
         else:
             from PyQt5.QtWidgets import QMessageBox
+
             QMessageBox.critical(self, "Error", "Select an input PDB!")
             return False
         # ligand
         if self.ligand_adjustment.isChecked():
-            if self.ligand.currentText() != '':
-                parameters['files']['ligand'] = self.ligand.currentText()
+            if self.ligand.currentText() != "":
+                parameters["files"]["ligand"] = self.ligand.currentText()
             else:
                 from PyQt5.QtWidgets import QMessageBox
+
                 QMessageBox.critical(self, "Error", "Select an ligand PDB!")
                 return False
         # output
-        parameters['files']['output'] = self.output_dir_path.text()
+        parameters["files"]["output"] = self.output_dir_path.text()
         # base_name
-        parameters['files']['base_name'] = self.base_name.text()
+        parameters["files"]["base_name"] = self.base_name.text()
 
         # modes
-        parameters['modes'] = dict()
+        parameters["modes"] = dict()
         # whole protein mode
-        parameters['modes']['whole_protein_mode'] = not self.box_adjustment.isChecked()
+        parameters["modes"]["whole_protein_mode"] = not self.box_adjustment.isChecked()
         # box adjustment mode
-        parameters['modes']['box_mode'] = self.box_adjustment.isChecked()
+        parameters["modes"]["box_mode"] = self.box_adjustment.isChecked()
         # resolution_mode
-        parameters['modes']['resolution_mode'] = "Low"
+        parameters["modes"]["resolution_mode"] = "Low"
         # surface_mode
-        parameters['modes']['surface_mode'] = True
+        parameters["modes"]["surface_mode"] = True
         # kvp_mode
-        parameters['modes']['kvp_mode'] = False
+        parameters["modes"]["kvp_mode"] = False
         # ligand_mode
-        parameters['modes']['ligand_mode'] = self.ligand_adjustment.isChecked()
+        parameters["modes"]["ligand_mode"] = self.ligand_adjustment.isChecked()
 
         # step_size
-        parameters['step_size'] = dict()
-        parameters['step_size']['step_size'] = 0.0
+        parameters["step_size"] = dict()
+        parameters["step_size"]["step_size"] = 0.0
 
         # probes
-        parameters['probes'] = dict()
+        parameters["probes"] = dict()
         # probe_in
-        parameters['probes']['probe_in'] = self.probe_in.value()
+        parameters["probes"]["probe_in"] = self.probe_in.value()
         # probe_out
-        parameters['probes']['probe_out'] = self.probe_out.value()
+        parameters["probes"]["probe_out"] = self.probe_out.value()
+
+        if (self.volume_cutoff.value() == 0.0) and (self.removal_distance.value() == 0.0):
+            from PyQt5.QtWidgets import QMessageBox
+
+            QMessageBox.critical(self, "Error", "Removal distance and Volume Cutoff cannot be zero at the same time!")
+            return False
 
         # cutoffs
-        parameters['cutoffs'] = dict()
+        parameters["cutoffs"] = dict()
         # volume_cutoff
-        parameters['cutoffs']['volume_cutoff'] = self.volume_cutoff.value()
+        parameters["cutoffs"]["volume_cutoff"] = self.volume_cutoff.value()
         # ligand_cutoff
-        parameters['cutoffs']['ligand_cutoff'] = self.ligand_cutoff.value()
+        parameters["cutoffs"]["ligand_cutoff"] = self.ligand_cutoff.value()
         # removal_distance
-        parameters['cutoffs']['removal_distance'] = self.removal_distance.value()
+        parameters["cutoffs"]["removal_distance"] = self.removal_distance.value()
 
         # visiblebox
         box = self.create_box_parameters()
-        parameters['visiblebox'] = dict()
-        parameters['visiblebox'].update(box)
+        parameters["visiblebox"] = dict()
+        parameters["visiblebox"].update(box)
 
         # internalbox
         box = self.create_box_parameters(is_internal_box=True)
-        parameters['internalbox'] = dict()
-        parameters['internalbox'].update(box)
+        parameters["internalbox"] = dict()
+        parameters["internalbox"].update(box)
 
         return parameters
 
-    def create_box_parameters(self, is_internal_box=False) -> Dict[str, Dict[str, float]]:
+    def create_box_parameters(
+        self, is_internal_box=False
+    ) -> Dict[str, Dict[str, float]]:
         """
         Create custom box coordinates (P1, P2, P3 and P4) that limits the search space in the box adjustment mode.
 
@@ -1234,39 +1533,79 @@ class PyMOLKVFinderWebTools(QMainWindow):
 
         # Get positions of box vertices
         # P1
-        x1 = -min_x * cos(angle2) - (-min_y) * sin(angle1) * sin(angle2) + (-min_z) * cos(angle1) * sin(angle2) + self.x
+        x1 = (
+            -min_x * cos(angle2)
+            - (-min_y) * sin(angle1) * sin(angle2)
+            + (-min_z) * cos(angle1) * sin(angle2)
+            + self.x
+        )
 
         y1 = -min_y * cos(angle1) + (-min_z) * sin(angle1) + self.y
 
-        z1 = min_x * sin(angle2) + min_y * sin(angle1) * cos(angle2) - min_z * cos(angle1) * cos(angle2) + self.z
+        z1 = (
+            min_x * sin(angle2)
+            + min_y * sin(angle1) * cos(angle2)
+            - min_z * cos(angle1) * cos(angle2)
+            + self.z
+        )
 
         # P2
-        x2 = max_x * cos(angle2) - (-min_y) * sin(angle1) * sin(angle2) + (-min_z) * cos(angle1) * sin(angle2) + self.x
+        x2 = (
+            max_x * cos(angle2)
+            - (-min_y) * sin(angle1) * sin(angle2)
+            + (-min_z) * cos(angle1) * sin(angle2)
+            + self.x
+        )
 
         y2 = (-min_y) * cos(angle1) + (-min_z) * sin(angle1) + self.y
 
-        z2 = (-max_x) * sin(angle2) - (-min_y) * sin(angle1) * cos(angle2) + (-min_z) * cos(angle1) * cos(angle2) + self.z
+        z2 = (
+            (-max_x) * sin(angle2)
+            - (-min_y) * sin(angle1) * cos(angle2)
+            + (-min_z) * cos(angle1) * cos(angle2)
+            + self.z
+        )
 
         # P3
-        x3 = (-min_x) * cos(angle2) - max_y * sin(angle1) * sin(angle2) + (-min_z) * cos(angle1) * sin(angle2) + self.x
+        x3 = (
+            (-min_x) * cos(angle2)
+            - max_y * sin(angle1) * sin(angle2)
+            + (-min_z) * cos(angle1) * sin(angle2)
+            + self.x
+        )
 
         y3 = max_y * cos(angle1) + (-min_z) * sin(angle1) + self.y
 
-        z3 = -(-min_x) * sin(angle2) - max_y * sin(angle1) * cos(angle2) + (-min_z) * cos(angle1) * cos(angle2) + self.z
+        z3 = (
+            -(-min_x) * sin(angle2)
+            - max_y * sin(angle1) * cos(angle2)
+            + (-min_z) * cos(angle1) * cos(angle2)
+            + self.z
+        )
 
         # P4
-        x4 = (-min_x) * cos(angle2) - (-min_y) * sin(angle1) * sin(angle2) + max_z * cos(angle1) * sin(angle2) + self.x
+        x4 = (
+            (-min_x) * cos(angle2)
+            - (-min_y) * sin(angle1) * sin(angle2)
+            + max_z * cos(angle1) * sin(angle2)
+            + self.x
+        )
 
         y4 = (-min_y) * cos(angle1) + max_z * sin(angle1) + self.y
 
-        z4 = -(-min_x) * sin(angle2) - (-min_y) * sin(angle1) * cos(angle2) + max_z * cos(angle1) * cos(angle2) + self.z
+        z4 = (
+            -(-min_x) * sin(angle2)
+            - (-min_y) * sin(angle1) * cos(angle2)
+            + max_z * cos(angle1) * cos(angle2)
+            + self.z
+        )
 
         # Create points
-        p1 = {'x': x1, 'y': y1, 'z': z1}
-        p2 = {'x': x2, 'y': y2, 'z': z2}
-        p3 = {'x': x3, 'y': y3, 'z': z3}
-        p4 = {'x': x4, 'y': y4, 'z': z4}
-        box = {'p1': p1, 'p2': p2, 'p3': p3, 'p4': p4}
+        p1 = {"x": x1, "y": y1, "z": z1}
+        p2 = {"x": x2, "y": y2, "z": z2}
+        p3 = {"x": x3, "y": y3, "z": z3}
+        p4 = {"x": x4, "y": y4, "z": z4}
+        box = {"p1": p1, "p2": p2, "p3": p3, "p4": p4}
 
         return box
 
@@ -1340,7 +1679,9 @@ class PyMOLKVFinderWebTools(QMainWindow):
             # Prepare request
             url = QUrl(f"{self.server}/{data['id']}")
             request = QtNetwork.QNetworkRequest(url)
-            request.setHeader(QtNetwork.QNetworkRequest.ContentTypeHeader, "application/json")
+            request.setHeader(
+                QtNetwork.QNetworkRequest.ContentTypeHeader, "application/json"
+            )
 
             # Get Request
             self.reply = self.network_manager.get(request)
@@ -1363,30 +1704,34 @@ class PyMOLKVFinderWebTools(QMainWindow):
 
         if error == QtNetwork.QNetworkReply.NoError:
             # Read data retrived from server
-            reply = json.loads(str(self.reply.readAll(), 'utf-8'))
+            reply = json.loads(str(self.reply.readAll(), "utf-8"))
 
             # Create parameters
             parameters = {
-                'status': reply['status'],
-                'id_added_manually': True,
-                'files': self.data['files'],
-                'modes': None,
-                'step_size': None,
-                'probes': None,
-                'cutoffs': None,
-                'visiblebox': None,
-                'internalbox': None
+                "status": reply["status"],
+                "id_added_manually": True,
+                "files": self.data["files"],
+                "modes": None,
+                "step_size": None,
+                "probes": None,
+                "cutoffs": None,
+                "visiblebox": None,
+                "internalbox": None,
             }
-            if parameters['files']['pdb'] is not None:
-                parameters['files']['pdb'] = os.path.basename(parameters['files']['pdb']).replace('.pdb', '')
-            if parameters['files']['ligand'] is not None:
-                parameters['files']['ligand'] = os.path.basename(parameters['files']['ligand']).replace('.pdb', '')
+            if parameters["files"]["pdb"] is not None:
+                parameters["files"]["pdb"] = os.path.basename(
+                    parameters["files"]["pdb"]
+                ).replace(".pdb", "")
+            if parameters["files"]["ligand"] is not None:
+                parameters["files"]["ligand"] = os.path.basename(
+                    parameters["files"]["ligand"]
+                ).replace(".pdb", "")
 
             # Create job file
             job = Job(parameters)
-            job.id = self.data['id']
+            job.id = self.data["id"]
             job.id_added_manually = True
-            job.status = reply['status']
+            job.status = reply["status"]
             job.output = reply
 
             # Save job
@@ -1402,7 +1747,7 @@ class PyMOLKVFinderWebTools(QMainWindow):
             self.available_jobs.addItem(job.id)
 
             # Export
-            if job.status == 'completed':
+            if job.status == "completed":
                 try:
                     job.export()
                 except Exception as e:
@@ -1413,11 +1758,13 @@ class PyMOLKVFinderWebTools(QMainWindow):
 
             # Message to user
             if verbosity in [1, 3]:
-                print(f"> Job ID ({self.data['id']}) was not found in KVFinder-web service!")
+                print(
+                    f"> Job ID ({self.data['id']}) was not found in KVFinder-web service!"
+                )
             QMessageBox.critical(
                 self,
                 "Job Submission",
-                f"Job ID ({self.data['id']}) was not found in KVFinder-web service!"
+                f"Job ID ({self.data['id']}) was not found in KVFinder-web service!",
             )
 
         elif error == QtNetwork.QNetworkReply.ConnectionRefusedError:
@@ -1429,7 +1776,7 @@ class PyMOLKVFinderWebTools(QMainWindow):
             QMessageBox.critical(
                 self,
                 "Job Submission",
-                "KVFinder-web service is Offline!\n\nTry again later!"
+                "KVFinder-web service is Offline!\n\nTry again later!",
             )
 
         # Clean data
@@ -1448,10 +1795,15 @@ class PyMOLKVFinderWebTools(QMainWindow):
         print(f"> Displaying results from Job ID: {job_id}")
 
         # Get job path
-        job_fn = os.path.join(os.path.expanduser('~'), '.KVFinder-web', self.available_jobs.currentText(), 'job.toml')
+        job_fn = os.path.join(
+            os.path.expanduser("~"),
+            ".KVFinder-web",
+            self.available_jobs.currentText(),
+            "job.toml",
+        )
 
         # Get job information of ID
-        with open(job_fn, 'r') as f:
+        with open(job_fn, "r") as f:
             job_info = toml.load(f=f)
 
         # Set results file
@@ -1477,11 +1829,14 @@ class PyMOLKVFinderWebTools(QMainWindow):
         results_file = self.vis_results_file_entry.text()
 
         # Check if results file exist
-        if os.path.exists(results_file) and results_file.endswith('.toml'):
+        if os.path.exists(results_file) and results_file.endswith(".toml"):
             print(f"> Loading results from: {self.vis_results_file_entry.text()}")
         else:
             from PyQt5.QtWidgets import QMessageBox
-            error_msg = QMessageBox.critical(self, "Error", "Results file cannot be opened! Check results file path.")
+
+            error_msg = QMessageBox.critical(
+                self, "Error", "Results file cannot be opened! Check results file path."
+            )
             return False
 
         # Create global variable for results
@@ -1490,19 +1845,24 @@ class PyMOLKVFinderWebTools(QMainWindow):
         # Read results file
         results = toml.load(results_file)
 
-        if 'FILES' in results.keys():
-            results['FILES_PATH'] = results.pop('FILES')
-        elif 'FILES_PATH' in results.keys():
+        if "FILES" in results.keys():
+            results["FILES_PATH"] = results.pop("FILES")
+        elif "FILES_PATH" in results.keys():
             pass
         else:
             from PyQt5.QtWidgets import QMessageBox
-            error_msg = QMessageBox.critical(self, "Error", "Results file has incorrect format! Please check your file.")
+
+            error_msg = QMessageBox.critical(
+                self,
+                "Error",
+                "Results file has incorrect format! Please check your file.",
+            )
             error_msg.exec_()
             return False
 
-        if 'PARAMETERS' in results.keys():
-            if 'STEP' in results['PARAMETERS'].keys():
-                results['PARAMETERS']['STEP_SIZE'] = results['PARAMETERS'].pop('STEP')
+        if "PARAMETERS" in results.keys():
+            if "STEP" in results["PARAMETERS"].keys():
+                results["PARAMETERS"]["STEP_SIZE"] = results["PARAMETERS"].pop("STEP")
 
         # Clean results
         self.clean_results()
@@ -1525,24 +1885,24 @@ class PyMOLKVFinderWebTools(QMainWindow):
         cmd.frame(1)
 
         # Load input
-        if 'INPUT' in results['FILES_PATH'].keys():
-            input_fn = results['FILES_PATH']['INPUT']
-            self.input_pdb = os.path.basename(input_fn.replace('.pdb', ''))
+        if "INPUT" in results["FILES_PATH"].keys():
+            input_fn = results["FILES_PATH"]["INPUT"]
+            self.input_pdb = os.path.basename(input_fn.replace(".pdb", ""))
             self.load_file(input_fn, self.input_pdb)
         else:
             self.input_pdb = None
 
         # Load ligand
-        if 'LIGAND' in results['FILES_PATH'].keys():
-            ligand_fn = results['FILES_PATH']['LIGAND']
-            self.ligand_pdb = os.path.basename(ligand_fn.replace('.pdb', ''))
+        if "LIGAND" in results["FILES_PATH"].keys():
+            ligand_fn = results["FILES_PATH"]["LIGAND"]
+            self.ligand_pdb = os.path.basename(ligand_fn.replace(".pdb", ""))
             self.load_file(ligand_fn, self.ligand_pdb)
         else:
             self.ligand_pdb = None
 
         # Load cavity
-        cavity_fn = results['FILES_PATH']['OUTPUT']
-        self.cavity_pdb = os.path.basename(cavity_fn.replace('.pdb', ''))
+        cavity_fn = results["FILES_PATH"]["OUTPUT"]
+        self.cavity_pdb = os.path.basename(cavity_fn.replace(".pdb", ""))
         self.load_cavity(cavity_fn, self.cavity_pdb)
 
         return
@@ -1557,7 +1917,12 @@ class PyMOLKVFinderWebTools(QMainWindow):
         from PyQt5.QtCore import QDir
 
         # Get results file
-        fname, _ = QFileDialog.getOpenFileName(self, caption='Choose KVFinder Results File', directory=os.getcwd(), filter="KVFinder Results File (*.KVFinder.results.toml);;All files (*)")
+        fname, _ = QFileDialog.getOpenFileName(
+            self,
+            caption="Choose KVFinder Results File",
+            directory=os.getcwd(),
+            filter="KVFinder Results File (*.KVFinder.results.toml);;All files (*)",
+        )
 
         if fname:
             fname = QDir.toNativeSeparators(fname)
@@ -1590,8 +1955,8 @@ class PyMOLKVFinderWebTools(QMainWindow):
         # Load cavity filename
         if os.path.exists(fname):
             cmd.load(fname, name, zoom=0)
-            cmd.hide('everything', name)
-            cmd.show('nonbonded', name)
+            cmd.hide("everything", name)
+            cmd.show("nonbonded", name)
 
     @staticmethod
     def load_file(fname, name) -> None:
@@ -1623,13 +1988,13 @@ class PyMOLKVFinderWebTools(QMainWindow):
         Fill "Information" frame on the Visualization tab.
         """
         # Input File
-        if 'INPUT' in results['FILES_PATH'].keys():
+        if "INPUT" in results["FILES_PATH"].keys():
             self.vis_input_file_entry.setText(f"{results['FILES_PATH']['INPUT']}")
         else:
             self.vis_input_file_entry.setText(f"")
 
         # Ligand File
-        if 'LIGAND' in results['FILES_PATH'].keys():
+        if "LIGAND" in results["FILES_PATH"].keys():
             self.vis_ligand_file_entry.setText(f"{results['FILES_PATH']['LIGAND']}")
         else:
             self.vis_ligand_file_entry.setText(f"")
@@ -1638,9 +2003,11 @@ class PyMOLKVFinderWebTools(QMainWindow):
         self.vis_cavities_file_entry.setText(f"{results['FILES_PATH']['OUTPUT']}")
 
         # Step Size
-        if 'PARAMETERS' in results.keys():
-            if 'STEP_SIZE' in results['PARAMETERS'].keys():
-                self.vis_step_size_entry.setText(f"{results['PARAMETERS']['STEP_SIZE']:.2f}")
+        if "PARAMETERS" in results.keys():
+            if "STEP_SIZE" in results["PARAMETERS"].keys():
+                self.vis_step_size_entry.setText(
+                    f"{results['PARAMETERS']['STEP_SIZE']:.2f}"
+                )
 
         return
 
@@ -1649,7 +2016,7 @@ class PyMOLKVFinderWebTools(QMainWindow):
         Fill "Volume" QListBox with volume information of the results file.
         """
         # Get cavity indexes
-        indexes = sorted(results['RESULTS']['VOLUME'].keys())
+        indexes = sorted(results["RESULTS"]["VOLUME"].keys())
         # Include Volume
         for index in indexes:
             item = f"{index}: {results['RESULTS']['VOLUME'][index]}"
@@ -1661,7 +2028,7 @@ class PyMOLKVFinderWebTools(QMainWindow):
         Fill "Surface Area" QListBox with volume information of the results file.
         """
         # Get cavity indexes
-        indexes = sorted(results['RESULTS']['AREA'].keys())
+        indexes = sorted(results["RESULTS"]["AREA"].keys())
         # Include Area
         for index in indexes:
             item = f"{index}: {results['RESULTS']['AREA'][index]}"
@@ -1673,7 +2040,7 @@ class PyMOLKVFinderWebTools(QMainWindow):
         Fill "Interface Residues" QListBox with volume information of the results file.
         """
         # Get cavity indexes
-        indexes = sorted(results['RESULTS']['RESIDUES'].keys())
+        indexes = sorted(results["RESULTS"]["RESIDUES"].keys())
         # Include Interface Residues
         for index in indexes:
             self.residues_list.addItem(index)
@@ -1700,7 +2067,7 @@ class PyMOLKVFinderWebTools(QMainWindow):
         # Get residues from cavities selected
         residues = []
         for cav in cavs:
-            for residue in results['RESULTS']['RESIDUES'][cav]:
+            for residue in results["RESULTS"]["RESIDUES"][cav]:
                 if residue not in residues:
                     residues.append(residue)
 
@@ -1724,7 +2091,7 @@ class PyMOLKVFinderWebTools(QMainWindow):
         cmd.create("residues", "res")
         cmd.delete("res")
         cmd.hide("everything", "residues")
-        cmd.show('sticks', 'residues')
+        cmd.show("sticks", "residues")
         cmd.disable(self.cavity_pdb)
         cmd.enable(self.cavity_pdb)
         cmd.set("auto_zoom", 1)
@@ -1830,8 +2197,8 @@ class PyMOLKVFinderWebTools(QMainWindow):
         PyQt Slot to change the "Server Status" field to Online.
         """
         self.server_status.clear()
-        self.server_status.setText('Online')
-        self.server_status.setStyleSheet('color: green;')
+        self.server_status.setText("Online")
+        self.server_status.setStyleSheet("color: green;")
 
     @pyqtSlot()
     def server_down(self) -> None:
@@ -1839,8 +2206,8 @@ class PyMOLKVFinderWebTools(QMainWindow):
         PyQt Slot to change the "Server Status" field to Offline.
         """
         self.server_status.clear()
-        self.server_status.setText('Offline')
-        self.server_status.setStyleSheet('color: red;')
+        self.server_status.setText("Offline")
+        self.server_status.setStyleSheet("color: red;")
 
     @pyqtSlot(list)
     def set_available_jobs(self, available_jobs) -> None:
@@ -1869,48 +2236,55 @@ class PyMOLKVFinderWebTools(QMainWindow):
 
         This method displays, on "Job Information" frame, the job status, input file, ligand file, output directory and parameters file.
         """
-        if self.available_jobs.currentText() != '':
+        if self.available_jobs.currentText() != "":
             # Get job path
-            job_fn = os.path.join(os.path.expanduser('~'), '.KVFinder-web', self.available_jobs.currentText(), 'job.toml')
+            job_fn = os.path.join(
+                os.path.expanduser("~"),
+                ".KVFinder-web",
+                self.available_jobs.currentText(),
+                "job.toml",
+            )
 
             # Read job file
-            with open(job_fn, 'r') as f:
+            with open(job_fn, "r") as f:
                 job_info = toml.load(f=f)
 
             # Fill job information labels
-            status = job_info['status'].capitalize()
-            if status == 'Queued' or status == 'Running':
+            status = job_info["status"].capitalize()
+            if status == "Queued" or status == "Running":
                 self.job_status_entry.setText(status)
-                self.job_status_entry.setStyleSheet('color: blue;')
+                self.job_status_entry.setStyleSheet("color: blue;")
                 # Disable button
                 self.button_show_job.setEnabled(False)
-            elif status == 'Completed':
+            elif status == "Completed":
                 self.job_status_entry.setText(status)
-                self.job_status_entry.setStyleSheet('color: green;')
+                self.job_status_entry.setStyleSheet("color: green;")
                 # Enable button
                 self.button_show_job.setEnabled(True)
             # Input file
-            if 'pdb' in job_info['files'].keys():
+            if "pdb" in job_info["files"].keys():
                 self.job_input_entry.setText(f"{job_info['files']['pdb']}")
             else:
                 self.job_input_entry.clear()
             # Ligand file
-            if 'ligand' in job_info['files'].keys():
+            if "ligand" in job_info["files"].keys():
                 self.job_ligand_entry.setText(f"{job_info['files']['ligand']}")
             else:
                 self.job_ligand_entry.clear()
             # Output directory
             self.job_output_dir_path_entry.setText(f"{job_info['files']['output']}")
             # ID added manually
-            if 'id_added_manually' in job_info.keys():
-                if job_info['id_added_manually']:
+            if "id_added_manually" in job_info.keys():
+                if job_info["id_added_manually"]:
                     self.job_parameters_entry.setText(f"Not available")
-                    if 'pdb' not in job_info['files'].keys():
+                    if "pdb" not in job_info["files"].keys():
                         self.job_input_entry.setText(f"Not available")
-                    if 'ligand' not in job_info['files'].keys():
+                    if "ligand" not in job_info["files"].keys():
                         self.job_ligand_entry.setText(f"Not available")
             else:
-                self.job_parameters_entry.setText(f"{job_info['files']['output']}/{self.available_jobs.currentText()}/{job_info['files']['base_name']}_parameters.toml")
+                self.job_parameters_entry.setText(
+                    f"{job_info['files']['output']}/{self.available_jobs.currentText()}/{job_info['files']['base_name']}_parameters.toml"
+                )
         else:
             # Disable button
             self.button_show_job.setEnabled(False)
@@ -1936,8 +2310,12 @@ class PyMOLKVFinderWebTools(QMainWindow):
         # Message to user
         message = QMessageBox(self)
         message.setWindowTitle(f"Job Notification")
-        message.setText(f'Job ID: {job_id}\nThis job is not available anymore in KVFinder-web service!\n')
-        message.setInformativeText(f"Jobs are kept for {days_job_expire} days after completion.")
+        message.setText(
+            f"Job ID: {job_id}\nThis job is not available anymore in KVFinder-web service!\n"
+        )
+        message.setInformativeText(
+            f"Jobs are kept for {days_job_expire} days after completion."
+        )
         if message.exec_() == QMessageBox.Ok:
             # Send signal to Worker thread
             self.msgbox_signal.emit(False)
@@ -2042,29 +2420,33 @@ class Job(object):
 
         # Job Information (local)
         # Status
-        self.status = parameters['status']
+        self.status = parameters["status"]
         # ID Added Manually
-        if 'id_added_manually' in parameters.keys():
-            if parameters['id_added_manually']:
-                self.id_added_manually = parameters['id_added_manually']
+        if "id_added_manually" in parameters.keys():
+            if parameters["id_added_manually"]:
+                self.id_added_manually = parameters["id_added_manually"]
         # Output directory
-        self.output_directory = parameters['files']['output']
+        self.output_directory = parameters["files"]["output"]
         # Base_name
-        self.base_name = parameters['files']['base_name']
+        self.base_name = parameters["files"]["base_name"]
         # Input PDB
-        if 'pdb' in parameters['files'].keys():
-            if parameters['files']['pdb'] is not None:
-                self.pdb = os.path.join(self.output_directory, parameters['files']['pdb'] + '.pdb')
+        if "pdb" in parameters["files"].keys():
+            if parameters["files"]["pdb"] is not None:
+                self.pdb = os.path.join(
+                    self.output_directory, parameters["files"]["pdb"] + ".pdb"
+                )
                 if not os.path.exists(self.pdb):
-                    if parameters['files']['pdb'] in cmd.get_names("all"):
-                        cmd.save(self.pdb, parameters['files']['pdb'], 0, 'pdb')
+                    if parameters["files"]["pdb"] in cmd.get_names("all"):
+                        cmd.save(self.pdb, parameters["files"]["pdb"], 0, "pdb")
         # Ligand PDB
-        if 'ligand' in parameters['files'].keys():
-            if parameters['files']['ligand'] is not None:
-                self.ligand = os.path.join(self.output_directory, parameters['files']['ligand'] + '.pdb')
+        if "ligand" in parameters["files"].keys():
+            if parameters["files"]["ligand"] is not None:
+                self.ligand = os.path.join(
+                    self.output_directory, parameters["files"]["ligand"] + ".pdb"
+                )
                 if not os.path.exists(self.ligand):
-                    if parameters['files']['ligand'] in cmd.get_names("all"):
-                        cmd.save(self.ligand, parameters['files']['ligand'], 0, 'pdb')
+                    if parameters["files"]["ligand"] in cmd.get_names("all"):
+                        cmd.save(self.ligand, parameters["files"]["ligand"], 0, "pdb")
         # Request information (service)
         # Input PDB
         if self.pdb:
@@ -2073,19 +2455,19 @@ class Job(object):
         if self.ligand:
             self._add_pdb(self.ligand, is_ligand=True)
         # Settings
-        self.input['settings'] = dict()
+        self.input["settings"] = dict()
         # Modes
-        self.input['settings']['modes'] = parameters['modes']
+        self.input["settings"]["modes"] = parameters["modes"]
         # Step size
-        self.input['settings']['step_size'] = parameters['step_size']
+        self.input["settings"]["step_size"] = parameters["step_size"]
         # Probes
-        self.input['settings']['probes'] = parameters['probes']
+        self.input["settings"]["probes"] = parameters["probes"]
         # Cutoffs
-        self.input['settings']['cutoffs'] = parameters['cutoffs']
+        self.input["settings"]["cutoffs"] = parameters["cutoffs"]
         # Visible box
-        self.input['settings']['visiblebox'] = parameters['visiblebox']
+        self.input["settings"]["visiblebox"] = parameters["visiblebox"]
         # Internal box
-        self.input['settings']['internalbox'] = parameters['internalbox']
+        self.input["settings"]["internalbox"] = parameters["internalbox"]
 
     def save(self, id: int) -> None:
         """
@@ -2099,30 +2481,30 @@ class Job(object):
             Job ID
         """
         # Create job directory in ~/.KVFinder-web/
-        job_dn = os.path.join(os.path.expanduser('~'), '.KVFinder-web', str(id))
+        job_dn = os.path.join(os.path.expanduser("~"), ".KVFinder-web", str(id))
         try:
             os.mkdir(job_dn)
         except FileExistsError:
             pass
 
         # Create job file inside ~/.KVFinder-web/id
-        job_fn = os.path.join(job_dn, 'job.toml')
-        with open(job_fn, 'w') as f:
+        job_fn = os.path.join(job_dn, "job.toml")
+        with open(job_fn, "w") as f:
             f.write("# TOML configuration file for KVFinder-web job\n\n")
-            f.write("title = \"KVFinder-web job file\"\n\n")
-            f.write(f"status = \"{self.status}\"\n\n")
+            f.write('title = "KVFinder-web job file"\n\n')
+            f.write(f'status = "{self.status}"\n\n')
             if self.id_added_manually:
                 f.write(f"id_added_manually = true\n\n")
             f.write(f"[files]\n")
             if self.pdb is not None:
-                f.write(f"pdb = \"{self.pdb}\"\n")
+                f.write(f'pdb = "{self.pdb}"\n')
             if self.ligand is not None:
-                f.write(f"ligand = \"{self.ligand}\"\n")
-            f.write(f"output = \"{self.output_directory}\"\n")
-            f.write(f"base_name = \"{self.base_name}\"\n")
-            f.write('\n')
-            toml.dump(o=self.input['settings'], f=f)
-            f.write('\n')
+                f.write(f'ligand = "{self.ligand}"\n')
+            f.write(f'output = "{self.output_directory}"\n')
+            f.write(f'base_name = "{self.base_name}"\n')
+            f.write("\n")
+            toml.dump(o=self.input["settings"], f=f)
+            f.write("\n")
 
     @classmethod
     def load(cls, fn: Optional[str]) -> Job:
@@ -2142,24 +2524,28 @@ class Job(object):
             A Job object with attributes loaded from a file containing job information
         """
         # Read job file
-        with open(fn, 'r') as f:
+        with open(fn, "r") as f:
             job_info = toml.load(f=f)
 
         # Fix pdb and ligand in job_info
-        if 'pdb' in job_info['files'].keys():
-            job_info['files']['pdb'] = os.path.basename(job_info['files']['pdb']).replace('.pdb', '')
-        if 'ligand' in job_info['files'].keys():
-            job_info['files']['ligand'] = os.path.basename(job_info['files']['ligand']).replace('.pdb', '')
+        if "pdb" in job_info["files"].keys():
+            job_info["files"]["pdb"] = os.path.basename(
+                job_info["files"]["pdb"]
+            ).replace(".pdb", "")
+        if "ligand" in job_info["files"].keys():
+            job_info["files"]["ligand"] = os.path.basename(
+                job_info["files"]["ligand"]
+            ).replace(".pdb", "")
 
         # Treat manually added id
-        if 'id_added_manually' in job_info.keys():
-            if job_info['id_added_manually']:
-                job_info['modes'] = None
-                job_info['step_size'] = None
-                job_info['probes'] = None
-                job_info['cutoffs'] = None
-                job_info['visiblebox'] = None
-                job_info['internalbox'] = None
+        if "id_added_manually" in job_info.keys():
+            if job_info["id_added_manually"]:
+                job_info["modes"] = None
+                job_info["step_size"] = None
+                job_info["probes"] = None
+                job_info["cutoffs"] = None
+                job_info["visiblebox"] = None
+                job_info["internalbox"] = None
 
         return cls(job_info)
 
@@ -2178,52 +2564,54 @@ class Job(object):
             pass
 
         # Export cavity
-        cavity_fn = os.path.join(base_dir, f'{self.base_name}.KVFinder.output.pdb')
-        with open(cavity_fn, 'w') as f:
+        cavity_fn = os.path.join(base_dir, f"{self.base_name}.KVFinder.output.pdb")
+        with open(cavity_fn, "w") as f:
             f.write(self.cavity)
 
         # Export report
-        report_fn = os.path.join(base_dir, f'{self.base_name}.KVFinder.results.toml')
+        report_fn = os.path.join(base_dir, f"{self.base_name}.KVFinder.results.toml")
         report = toml.loads(self.report)
-        report['FILES_PATH']['INPUT'] = self.pdb
-        report['FILES_PATH']['LIGAND'] = self.ligand
-        report['FILES_PATH']['OUTPUT'] = cavity_fn
-        with open(report_fn, 'w') as f:
-            f.write('# TOML results file for parKVFinder software\n\n')
+        report["FILES_PATH"]["INPUT"] = self.pdb
+        report["FILES_PATH"]["LIGAND"] = self.ligand
+        report["FILES_PATH"]["OUTPUT"] = cavity_fn
+        with open(report_fn, "w") as f:
+            f.write("# TOML results file for parKVFinder software\n\n")
             toml.dump(o=report, f=f)
 
         # Export log
-        log_fn = os.path.join(base_dir, 'KVFinder.log')
-        with open(log_fn, 'w') as f:
-            for line in self.log.split('\n'):
-                if 'Running parKVFinder for: ' in line:
-                    line = f'Running parKVFinder for job ID: {self.id}'
-                    f.write(f'{line}\n')
-                elif 'Dictionary: ' in line:
+        log_fn = os.path.join(base_dir, "KVFinder.log")
+        with open(log_fn, "w") as f:
+            for line in self.log.split("\n"):
+                if "Running parKVFinder for: " in line:
+                    line = f"Running parKVFinder for job ID: {self.id}"
+                    f.write(f"{line}\n")
+                elif "Dictionary: " in line:
                     pass
                 else:
-                    f.write(f'{line}\n')
+                    f.write(f"{line}\n")
 
         # Export parameters
         if not self.id_added_manually:
-            parameter_fn = os.path.join(self.output_directory, self.id, f'{self.base_name}_parameters.toml')
-            with open(parameter_fn, 'w') as f:
+            parameter_fn = os.path.join(
+                self.output_directory, self.id, f"{self.base_name}_parameters.toml"
+            )
+            with open(parameter_fn, "w") as f:
                 f.write("# TOML configuration file for KVFinder-web job.\n\n")
-                f.write("title = \"KVFinder-web parameters file\"\n\n")
+                f.write('title = "KVFinder-web parameters file"\n\n')
                 f.write(f"[files]\n")
                 f.write("# The path of the input PDB file.\n")
-                f.write(f"pdb = \"{self.pdb}\"\n")
+                f.write(f'pdb = "{self.pdb}"\n')
                 f.write("# The path for the ligand's PDB file.\n")
                 if self.ligand is not None:
-                    f.write(f"ligand = \"{self.ligand}\"\n")
+                    f.write(f'ligand = "{self.ligand}"\n')
                 else:
-                    f.write(f"ligand = \"-\"\n")
-                f.write('\n')
+                    f.write(f'ligand = "-"\n')
+                f.write("\n")
                 f.write(f"[settings]\n")
                 f.write(f"# Settings for cavity detection.\n\n")
-                settings = {'settings': self.input['settings']}
+                settings = {"settings": self.input["settings"]}
                 toml.dump(o=settings, f=f)
-                f.write('\n')
+                f.write("\n")
 
 
 class Worker(QThread):
@@ -2248,7 +2636,7 @@ class Worker(QThread):
         Parameters
         ----------
         server: str
-            KVFinder-web service address and port (Default: http://parkvfinder.cnpem.br:8081). Users may set this variable to a locally configured KVFinder-web service by changing 'server' global variable
+            KVFinder-web service address and port (Default: http://kvfinder-web.cnpem.br:8081). Users may set this variable to a locally configured KVFinder-web service by changing 'server' global variable
         server_status: str
             Whether the KVFinder-web service defined by global variable 'server' is Online or Offline
         """
@@ -2258,6 +2646,7 @@ class Worker(QThread):
 
     def run(self) -> None:
         from PyQt5.QtCore import QTimer, QEventLoop
+
         """
         Starts worker thread.
 
@@ -2278,7 +2667,6 @@ class Worker(QThread):
         counter = 0
 
         while True:
-
             # Loop to wait QMessageBox signal from GUI thread that delete jobs that are no long available in KVFinder-web service
             while self.wait:
                 # Wait timer to check wait status
@@ -2296,19 +2684,19 @@ class Worker(QThread):
 
             # Jobs available to check status and server up
             if jobs and self.server_status:
-
                 # Flag to indicate that there is at least one job completed with downloaded results in this loop
                 flag = False
 
                 # Check all job ids
                 for job_id in jobs:
-
                     # Message to user
                     if verbosity in [2, 3]:
                         print(f"> Checking Job ID: {job_id}")
 
                     # Get job information
-                    job_fn = os.path.join(os.path.expanduser('~'), '.KVFinder-web', job_id, 'job.toml')
+                    job_fn = os.path.join(
+                        os.path.expanduser("~"), ".KVFinder-web", job_id, "job.toml"
+                    )
                     self.job_info = Job.load(fn=job_fn)
                     self.job_info.id = job_id
 
@@ -2316,11 +2704,11 @@ class Worker(QThread):
                     status = self.job_info.status
 
                     # Handle job status
-                    if status == 'queued' or status == 'running':
+                    if status == "queued" or status == "running":
                         # Get request for job results
                         self._get_results(job_id)
 
-                    elif status == 'completed':
+                    elif status == "completed":
                         # Check if results files exist
                         output_exists = self._check_output_exists()
 
@@ -2355,13 +2743,15 @@ class Worker(QThread):
             else:
                 # Message to user
                 if verbosity in [2, 3]:
-                    print('> Checking KVFinder-web service status ...')
+                    print("> Checking KVFinder-web service status ...")
 
                 # Check service status
                 status = _check_server_status(self.server)
                 while not status:
                     if verbosity in [2, 3]:
-                        print("\n\033[93mWarning:\033[0m KVFinder-web service is Offline!\n")
+                        print(
+                            "\n\033[93mWarning:\033[0m KVFinder-web service is Offline!\n"
+                        )
                     # Send signal that service is down
                     self.server_status_signal.emit(status)
 
@@ -2372,7 +2762,7 @@ class Worker(QThread):
 
                     # Message to user
                     if verbosity in [2, 3]:
-                        print('> Checking KVFinder-web service status ...')
+                        print("> Checking KVFinder-web service status ...")
 
                 # Update server_status value
                 self.server_status = status
@@ -2403,9 +2793,11 @@ class Worker(QThread):
             self.network_manager = QtNetwork.QNetworkAccessManager()
 
             # Prepare request
-            url = QUrl(f'{self.server}/{job_id}')
+            url = QUrl(f"{self.server}/{job_id}")
             request = QtNetwork.QNetworkRequest(url)
-            request.setHeader(QtNetwork.QNetworkRequest.ContentTypeHeader, "application/json")
+            request.setHeader(
+                QtNetwork.QNetworkRequest.ContentTypeHeader, "application/json"
+            )
 
             # Get Request
             self.reply = self.network_manager.get(request)
@@ -2431,17 +2823,16 @@ class Worker(QThread):
         error = self.reply.error()
 
         if error == QtNetwork.QNetworkReply.NoError:
-
             # Read data retrived from service
-            reply = json.loads(str(self.reply.readAll(), 'utf-8'))
+            reply = json.loads(str(self.reply.readAll(), "utf-8"))
 
             # Pass outputs to Job class
             self.job_info.output = reply
-            self.job_info.status = reply['status']
+            self.job_info.status = reply["status"]
             self.job_info.save(self.job_info.id)
 
             # Export results
-            if self.job_info.status == 'completed':
+            if self.job_info.status == "completed":
                 try:
                     self.job_info.export()
                 except Exception as e:
@@ -2451,7 +2842,6 @@ class Worker(QThread):
             self.server_up.emit()
 
         elif error == QtNetwork.QNetworkReply.ContentNotFoundError:
-
             # Send Server Up Signal to GUI Thread
             self.server_up.emit()
 
@@ -2460,7 +2850,9 @@ class Worker(QThread):
             self.id_signal.emit(self.job_info.id)
 
             # Remove job id from .KVFinder-web
-            job_dn = os.path.join(os.path.expanduser('~'), '.KVFinder-web', self.job_info.id)
+            job_dn = os.path.join(
+                os.path.expanduser("~"), ".KVFinder-web", self.job_info.id
+            )
             try:
                 self.erase_job_dir(job_dn)
                 self.available_jobs_signal.emit(_get_jobs())
@@ -2468,7 +2860,6 @@ class Worker(QThread):
                 print("Error occurred: ", e)
 
         elif error == QtNetwork.QNetworkReply.ConnectionRefusedError:
-
             # Message to user
             if verbosity in [2, 3]:
                 print("\n\033[93mWarning:\033[0m KVFinder-web service is Offline!\n")
@@ -2489,11 +2880,17 @@ class Worker(QThread):
         base_dir = os.path.join(self.job_info.output_directory, self.job_info.id)
 
         # Get output files paths
-        log = os.path.join(base_dir, 'KVFinder.log')
-        report = os.path.join(base_dir, f'{self.job_info.base_name}.KVFinder.results.toml')
-        cavity = os.path.join(base_dir, f'{self.job_info.base_name}.KVFinder.output.pdb')
+        log = os.path.join(base_dir, "KVFinder.log")
+        report = os.path.join(
+            base_dir, f"{self.job_info.base_name}.KVFinder.results.toml"
+        )
+        cavity = os.path.join(
+            base_dir, f"{self.job_info.base_name}.KVFinder.output.pdb"
+        )
         if not self.job_info.id_added_manually:
-            parameters = os.path.join(base_dir, f'{self.job_info.base_name}_parameters.toml')
+            parameters = os.path.join(
+                base_dir, f"{self.job_info.base_name}_parameters.toml"
+            )
         else:
             parameters = True
 
@@ -2556,7 +2953,7 @@ class Form(QDialog):
         Parameters
         ----------
         server: str
-            KVFinder-web service address and port (Default: http://parkvfinder.cnpem.br:8081). Users may set this variable to a locally configured KVFinder-web service by changing 'server' global variable
+            KVFinder-web service address and port (Default: http://kvfinder-web.cnpem.br:8081). Users may set this variable to a locally configured KVFinder-web service by changing 'server' global variable
         output_dir: str
             Path to output directory
         """
@@ -2575,11 +2972,21 @@ class Form(QDialog):
         output_dir: str
             Path to output directory
         """
-        from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QPushButton, QSpacerItem, QSizePolicy, QDialogButtonBox, QStyle
+        from PyQt5.QtWidgets import (
+            QVBoxLayout,
+            QHBoxLayout,
+            QLabel,
+            QLineEdit,
+            QPushButton,
+            QSpacerItem,
+            QSizePolicy,
+            QDialogButtonBox,
+            QStyle,
+        )
         from PyQt5.QtCore import Qt
 
         # Set Window Title
-        self.setWindowTitle('Job ID Form')
+        self.setWindowTitle("Job ID Form")
 
         # Set alignment of QDialog
         self.verticalLayout = QVBoxLayout(self)
@@ -2588,7 +2995,7 @@ class Form(QDialog):
 
         # Create header label
         self.header = QLabel(self)
-        self.header.setText("Fill the fields and click on \'Add\' button:")
+        self.header.setText("Fill the fields and click on 'Add' button:")
         self.header.setAlignment(Qt.AlignCenter)
 
         # Create Job ID layout
@@ -2673,8 +3080,12 @@ class Form(QDialog):
 
         # hook up QDialog buttons callbacks
         self.button_browse_output_dir.clicked.connect(self.select_directory)
-        self.button_browse_input_file.clicked.connect(lambda: self.select_file(self.input_file, "Choose Input PDB File"))
-        self.button_browse_ligand_file.clicked.connect(lambda: self.select_file(self.ligand_file, "Choose Ligand PDB File"))
+        self.button_browse_input_file.clicked.connect(
+            lambda: self.select_file(self.input_file, "Choose Input PDB File")
+        )
+        self.button_browse_ligand_file.clicked.connect(
+            lambda: self.select_file(self.ligand_file, "Choose Ligand PDB File")
+        )
         self.buttons.accepted.connect(self.add_job_id)
         self.buttons.rejected.connect(self.close)
 
@@ -2686,18 +3097,25 @@ class Form(QDialog):
         """
         # Handle button click by user
         # Ok
-        if self.job_id.text() and os.path.isdir(self.output_dir.text()) and self.base_name.text():
+        if (
+            self.job_id.text()
+            and os.path.isdir(self.output_dir.text())
+            and self.base_name.text()
+        ):
             return self.accept()
         # Cancel
         else:
             from PyQt5.QtWidgets import QMessageBox
+
             # Message to user
             if verbosity in [2, 3]:
-                print("Fill required fields: Job ID, Output Base Name and/or Output Directory.")
+                print(
+                    "Fill required fields: Job ID, Output Base Name and/or Output Directory."
+                )
             QMessageBox.critical(
                 self,
                 "Job Submission",
-                "Fill required fields: Job ID, Output Base Name and Output Directory."
+                "Fill required fields: Job ID, Output Base Name and Output Directory.",
             )
 
             return None
@@ -2713,13 +3131,15 @@ class Form(QDialog):
         """
         # Prepara data from Form in Dict
         data = {
-            'id': self.job_id.text(),
-            'files': {
-                'base_name': self.base_name.text(),
-                'output': self.output_dir.text(),
-                'pdb': self.input_file.text() if self.input_file.text() != '' else None,
-                'ligand': self.ligand_file.text() if self.ligand_file.text() != '' else None
-            }
+            "id": self.job_id.text(),
+            "files": {
+                "base_name": self.base_name.text(),
+                "output": self.output_dir.text(),
+                "pdb": self.input_file.text() if self.input_file.text() != "" else None,
+                "ligand": self.ligand_file.text()
+                if self.ligand_file.text() != ""
+                else None,
+            },
         }
         return data
 
@@ -2732,7 +3152,9 @@ class Form(QDialog):
         from PyQt5.QtWidgets import QFileDialog
         from PyQt5.QtCore import QDir
 
-        fname = QFileDialog.getExistingDirectory(caption='Choose Output Directory', directory=os.getcwd())
+        fname = QFileDialog.getExistingDirectory(
+            caption="Choose Output Directory", directory=os.getcwd()
+        )
 
         if fname:
             fname = QDir.toNativeSeparators(fname)
@@ -2751,7 +3173,9 @@ class Form(QDialog):
         from PyQt5.QtCore import QDir
 
         # Get results file
-        fname, _ = QFileDialog.getOpenFileName(self, caption=caption, directory=os.getcwd(), filter="PDB file (*.pdb)")
+        fname, _ = QFileDialog.getOpenFileName(
+            self, caption=caption, directory=os.getcwd(), filter="PDB file (*.pdb)"
+        )
 
         if fname:
             fname = QDir.toNativeSeparators(fname)
@@ -2768,7 +3192,13 @@ class Message(QDialog):
     Class that defines a custom QDialog that displays the Job ID, Job status and a notification of a Job submission.
     """
 
-    def __init__(self, msg: str, job_id: Optional[str] = None, status: Optional[str] = None, notification: Optional[str] = None):
+    def __init__(
+        self,
+        msg: str,
+        job_id: Optional[str] = None,
+        status: Optional[str] = None,
+        notification: Optional[str] = None,
+    ):
         super(Message, self).__init__()
         """
         Construct a Message GUI and fill its fields.
@@ -2815,10 +3245,10 @@ class Message(QDialog):
         # Status
         if status:
             self.status.setText(status.capitalize())
-            if status == 'queued' or status == 'running':
-                self.status.setStyleSheet('color: blue;')
-            elif status == 'completed':
-                self.status.setStyleSheet('color: green;')
+            if status == "queued" or status == "running":
+                self.status.setStyleSheet("color: blue;")
+            elif status == "completed":
+                self.status.setStyleSheet("color: green;")
 
         # Notification
         if notification:
@@ -2839,12 +3269,22 @@ class Message(QDialog):
         notification: str
             Notification from the KVFinder-web service
         """
-        from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QTextEdit, QSpacerItem, QSizePolicy, QDialogButtonBox, QStyle
+        from PyQt5.QtWidgets import (
+            QVBoxLayout,
+            QHBoxLayout,
+            QLabel,
+            QLineEdit,
+            QTextEdit,
+            QSpacerItem,
+            QSizePolicy,
+            QDialogButtonBox,
+            QStyle,
+        )
         from PyQt5.QtCore import Qt
         from PyQt5.QtGui import QFont, QIcon
 
         # Set Window Title
-        self.setWindowTitle('Job Submission')
+        self.setWindowTitle("Job Submission")
 
         # Set alignment of QDialog
         self.vframe = QVBoxLayout(self)
@@ -2854,7 +3294,11 @@ class Message(QDialog):
         self.hframe1 = QHBoxLayout()
         # Icon
         self.icon = QLabel(self)
-        pixmap = self.style().standardIcon(QStyle.SP_MessageBoxInformation).pixmap(30, 30, QIcon.Active, QIcon.On)
+        pixmap = (
+            self.style()
+            .standardIcon(QStyle.SP_MessageBoxInformation)
+            .pixmap(30, 30, QIcon.Active, QIcon.On)
+        )
         self.icon.setPixmap(pixmap)
         self.icon.setAlignment(Qt.AlignCenter)
         self.icon.setSizePolicy(QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed))
@@ -2874,11 +3318,15 @@ class Message(QDialog):
             # Job ID label
             self.job_id_label = QLabel(self)
             self.job_id_label.setText("Job ID:")
-            self.job_id_label.setSizePolicy(QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Preferred))
+            self.job_id_label.setSizePolicy(
+                QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Preferred)
+            )
             self.job_id_label.setAlignment(Qt.AlignCenter)
             # Job ID entry
             self.job_id = QLineEdit(self)
-            self.job_id.setSizePolicy(QSizePolicy(QSizePolicy.Minimum, QSizePolicy.Fixed))
+            self.job_id.setSizePolicy(
+                QSizePolicy(QSizePolicy.Minimum, QSizePolicy.Fixed)
+            )
             self.job_id.setReadOnly(True)
             self.job_id.setFixedWidth(200)
             # add to layout
@@ -2892,11 +3340,15 @@ class Message(QDialog):
             # Job ID label
             self.status_label = QLabel(self)
             self.status_label.setText("Status:")
-            self.status_label.setSizePolicy(QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Preferred))
+            self.status_label.setSizePolicy(
+                QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Preferred)
+            )
             self.status_label.setAlignment(Qt.AlignCenter)
             # Job ID entry
             self.status = QLineEdit(self)
-            self.status.setSizePolicy(QSizePolicy(QSizePolicy.Minimum, QSizePolicy.Fixed))
+            self.status.setSizePolicy(
+                QSizePolicy(QSizePolicy.Minimum, QSizePolicy.Fixed)
+            )
             self.status.setReadOnly(True)
             font = QFont()
             font.setBold(True)
@@ -2913,7 +3365,9 @@ class Message(QDialog):
         if notification:
             # Notification entry
             self.notification = QTextEdit(self)
-            self.notification.setSizePolicy(QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding))
+            self.notification.setSizePolicy(
+                QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+            )
             self.notification.setReadOnly(True)
             self.notification.setAlignment(Qt.AlignCenter)
             # add to layout
@@ -2951,7 +3405,7 @@ def _check_server_status(server) -> bool:
     Parameters
     ----------
     server: str
-        KVFinder-web service address (Default: http://parkvfinder.cnpem.br). Users may set this variable to a locally configured KVFinder-web service by changing 'server' global variable
+        KVFinder-web service address (Default: http://kvfinder-web.cnpem.br). Users may set this variable to a locally configured KVFinder-web service by changing 'server' global variable
 
     Returns
     -------
@@ -2959,6 +3413,7 @@ def _check_server_status(server) -> bool:
         Whether the server is Online or Offline
     """
     import urllib.request
+
     try:
         urllib.request.urlopen(server, timeout=1).getcode()
         return True
@@ -2976,7 +3431,7 @@ def _get_jobs() -> list:
         A Python list of Job IDs
     """
     # Get job dir
-    d = os.path.join(os.path.expanduser('~'), '.KVFinder-web/')
+    d = os.path.join(os.path.expanduser("~"), ".KVFinder-web/")
 
     # Get jobs availables in dir
     jobs = os.listdir(d)
@@ -3026,4 +3481,6 @@ about_text = """
 <p style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br /></p>
 <p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">Citation for PyMOL 2 may be found here:</p>
 <p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><a href="http://pymol.sourceforge.net/faq.html#CITE"><span style=" text-decoration: underline; color:#0000ff;">https://pymol.org/2/support.html?</span></a></p></body></html>
-""".format(days_job_expire, 's' if days_job_expire > 1 else '')
+""".format(
+    days_job_expire, "s" if days_job_expire > 1 else ""
+)
