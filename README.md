@@ -47,6 +47,28 @@ To install PyMOL KVFinder-web Tools, download the latest version of PyMOL KVFind
 
 Or, if you clone this [repository](https://github.com/LBC-LNBio/PyMOL-KVFinder-web-Tools), instead of selecting `PyMOL-KVFinder-web-Tools.zip` (Step 5), user must select `__init__.py` of PyMOL-KVFinder-web-Tools directory.
 
+To use the PyMOL KVFinder-web Tools in a locally configured KVFinder-web service, users must change the server url and port hardcoded on the [**init**.py](https://github.com/LBC-LNBio/PyMOL-KVFinder-web-Tools/blob/main/PyMOL-KVFinder-web-tools/__init__.py) file and reinstall the client plugin on PyMOL.
+
+From:
+
+```bash
+    # Server                                 #
+    server = "http://kvfinder-web.cnpem.br"  #
+    # Path                                   #
+    port = "/api"                            #
+```
+
+to:
+
+```bash
+    # Server                                 #
+    server = "http://localhost:8081"         #
+    # Path                                   #
+    path = ""                                #
+```
+
+If the KVFinder-web service is on another computer on your network, you must provide the IP Address instead of localhost.
+
 ### KVFinder-web portal
 
 The KVFinder-web portal, written in R and Shiny, is a graphical web application for detecting and characterizing biomolecular cavities at a KVFinder-web service, natively configured in our publicly available web service ([http://kvfinder-web.cnpem.br](http://kvfinder-web.cnpem.br)).
