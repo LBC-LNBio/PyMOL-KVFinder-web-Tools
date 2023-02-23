@@ -47,7 +47,7 @@ To install PyMOL KVFinder-web Tools, download the latest version of PyMOL KVFind
 
 Or, if you clone this [repository](https://github.com/LBC-LNBio/PyMOL-KVFinder-web-Tools), instead of selecting `PyMOL-KVFinder-web-Tools.zip` (Step 5), user must select `__init__.py` of PyMOL-KVFinder-web-Tools directory.
 
-To use the PyMOL KVFinder-web Tools in a locally configured KVFinder-web service, users must change the server url and port hardcoded on the [__init__.py](https://github.com/LBC-LNBio/PyMOL-KVFinder-web-Tools/blob/main/PyMOL-KVFinder-web-tools/__init__.py) file and reinstall the client plugin on PyMOL.
+To use the PyMOL KVFinder-web Tools in a locally configured KVFinder-web service, users must change the server url and port hardcoded on the [\_\_init\_\_.py](https://github.com/LBC-LNBio/PyMOL-KVFinder-web-Tools/blob/main/PyMOL-KVFinder-web-tools/__init__.py) file and reinstall the client plugin on PyMOL.
 
 From:
 
