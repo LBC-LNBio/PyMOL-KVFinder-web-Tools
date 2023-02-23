@@ -22,15 +22,16 @@
 ###############################################################################
 
 
-from __future__ import absolute_import, print_function, annotations
+from __future__ import absolute_import, annotations, print_function
 
-import os
 import json
-import toml
-from typing import Optional, Any, Dict
-from PyQt5.QtWidgets import QMainWindow, QDialog, QLineEdit
-from PyQt5.QtCore import QThread, pyqtSlot, pyqtSignal
+import os
+import urllib.parse
+from typing import Any, Dict, Optional
 
+import toml
+from PyQt5.QtCore import QThread, pyqtSignal, pyqtSlot
+from PyQt5.QtWidgets import QDialog, QLineEdit, QMainWindow
 
 # global reference to avoid garbage collection of our dialog
 dialog = None
@@ -45,8 +46,8 @@ worker = None
 # variable to the service you are using  #
 # Server                                 #
 server = "http://kvfinder-web.cnpem.br"  #
-# Port                                   #
-port = "8081"                            #
+# Path                                   #
+path = "/api"                            #
 #                                        #
 # Days until job expire                  #
 days_job_expire = 1                      #
@@ -188,7 +189,7 @@ class PyMOLKVFinderWebTools(QMainWindow):
     # Signals
     msgbox_signal = pyqtSignal(bool)
 
-    def __init__(self, server=server, port=port):
+    def __init__(self, server=server, path=path):
         super(PyMOLKVFinderWebTools, self).__init__()
         """
         This method initialize our graphical user interface core attributes and startup configuration, and our worker thread to communicate with KVFinder-web service located at 'server' variable.
@@ -197,8 +198,8 @@ class PyMOLKVFinderWebTools(QMainWindow):
         ----------
         server: str
             KVFinder-web service address (Default: http://kvfinder-web.cnpem.br). Users may set this variable to a locally configured KVFinder-web service by changing 'server' global variable.
-        port: str
-            Server port to communicate with KVFinder-web service (Default: 8081)
+        path: str
+            Server path to communicate with KVFinder-web service (Default: /api)
         """
         from PyQt5.QtNetwork import QNetworkAccessManager
 
@@ -217,7 +218,7 @@ class PyMOLKVFinderWebTools(QMainWindow):
         self.z = 0.0
 
         # Define server
-        self.server = f"{server}:{port}"
+        self.server = urllib.parse.urljoin(server, path)
         self.network_manager = QNetworkAccessManager()
 
         # Check server status
@@ -317,7 +318,7 @@ class PyMOLKVFinderWebTools(QMainWindow):
         The job submission is handled by QtNetwork package, part of PyQt5, that uses a POST method to send a JSON with data to KVFinder-web service.
         """
         from PyQt5 import QtNetwork
-        from PyQt5.QtCore import QUrl, QJsonDocument
+        from PyQt5.QtCore import QJsonDocument, QUrl
 
         # Create job
         parameters = self.create_parameters()
@@ -568,8 +569,9 @@ class PyMOLKVFinderWebTools(QMainWindow):
         max_z: float
             Maximum Z coordinate.
         """
+        from math import cos, sin
+
         from pymol import cmd
-        from math import sin, cos
 
         # Prepare dimensions
         angle1 = 0.0
@@ -776,7 +778,7 @@ class PyMOLKVFinderWebTools(QMainWindow):
             Whether the GUI is starting up.
         """
         from pymol import cmd
-        from PyQt5.QtWidgets import QMessageBox, QCheckBox
+        from PyQt5.QtWidgets import QCheckBox, QMessageBox
 
         # Restore Results Tab
         if not is_startup:
@@ -865,8 +867,8 @@ class PyMOLKVFinderWebTools(QMainWindow):
 
         This method opens a QFileDialog to select a directory.
         """
-        from PyQt5.QtWidgets import QFileDialog
         from PyQt5.QtCore import QDir
+        from PyQt5.QtWidgets import QFileDialog
 
         fname = QFileDialog.getExistingDirectory(
             caption="Choose Output Directory", directory=os.getcwd()
@@ -944,7 +946,8 @@ class PyMOLKVFinderWebTools(QMainWindow):
 
         This method calculates each vertice of the custom box. Then, it draws and connects them on the PyMOL viewer as a object named 'box'.
         """
-        from math import pi, sin, cos
+        from math import cos, pi, sin
+
         import pymol
         from pymol import cmd
 
@@ -1368,7 +1371,7 @@ class PyMOLKVFinderWebTools(QMainWindow):
 
         This method displays a help message to the user, explaining the variables shown on the Box adjustment frame.
         """
-        from PyQt5 import QtWidgets, QtCore
+        from PyQt5 import QtCore, QtWidgets
 
         text = QtCore.QCoreApplication.translate(
             "KVFinderWeb",
@@ -1451,10 +1454,16 @@ class PyMOLKVFinderWebTools(QMainWindow):
         # probe_out
         parameters["probes"]["probe_out"] = self.probe_out.value()
 
-        if (self.volume_cutoff.value() == 0.0) and (self.removal_distance.value() == 0.0):
+        if (self.volume_cutoff.value() == 0.0) and (
+            self.removal_distance.value() == 0.0
+        ):
             from PyQt5.QtWidgets import QMessageBox
 
-            QMessageBox.critical(self, "Error", "Removal distance and Volume Cutoff cannot be zero at the same time!")
+            QMessageBox.critical(
+                self,
+                "Error",
+                "Removal distance and Volume Cutoff cannot be zero at the same time!",
+            )
             return False
 
         # cutoffs
@@ -1496,7 +1505,7 @@ class PyMOLKVFinderWebTools(QMainWindow):
         box: dict
             A Python dictionary containing xyz coordinates for P1 (origin), P2 (X-axis), P3 (Y-axis) and P4 (Z-axis) of the internal or visible box
         """
-        from math import pi, cos, sin
+        from math import cos, pi, sin
 
         # Get box parameters
         if self.box_adjustment.isChecked():
@@ -1677,7 +1686,7 @@ class PyMOLKVFinderWebTools(QMainWindow):
 
         try:
             # Prepare request
-            url = QUrl(f"{self.server}/{data['id']}")
+            url = QUrl(urllib.parse.urljoin(self.server, data["id"]))
             request = QtNetwork.QNetworkRequest(url)
             request.setHeader(
                 QtNetwork.QNetworkRequest.ContentTypeHeader, "application/json"
@@ -1913,8 +1922,8 @@ class PyMOLKVFinderWebTools(QMainWindow):
 
         This method opens a QFileDialog to select a results file of parKVFinder.
         """
-        from PyQt5.QtWidgets import QFileDialog
         from PyQt5.QtCore import QDir
+        from PyQt5.QtWidgets import QFileDialog
 
         # Get results file
         fname, _ = QFileDialog.getOpenFileName(
@@ -2636,7 +2645,7 @@ class Worker(QThread):
         Parameters
         ----------
         server: str
-            KVFinder-web service address and port (Default: http://kvfinder-web.cnpem.br:8081). Users may set this variable to a locally configured KVFinder-web service by changing 'server' global variable
+            KVFinder-web service address and path (Default: http://kvfinder-web.cnpem.br/api). Users may set this variable to a locally configured KVFinder-web service by changing 'server' global variable
         server_status: str
             Whether the KVFinder-web service defined by global variable 'server' is Online or Offline
         """
@@ -2645,7 +2654,7 @@ class Worker(QThread):
         self.server_status = server_status
 
     def run(self) -> None:
-        from PyQt5.QtCore import QTimer, QEventLoop
+        from PyQt5.QtCore import QEventLoop, QTimer
 
         """
         Starts worker thread.
@@ -2793,7 +2802,7 @@ class Worker(QThread):
             self.network_manager = QtNetwork.QNetworkAccessManager()
 
             # Prepare request
-            url = QUrl(f"{self.server}/{job_id}")
+            url = QUrl(urllib.parse.urljoin(self.server, job_id))
             request = QtNetwork.QNetworkRequest(url)
             request.setHeader(
                 QtNetwork.QNetworkRequest.ContentTypeHeader, "application/json"
@@ -2953,7 +2962,7 @@ class Form(QDialog):
         Parameters
         ----------
         server: str
-            KVFinder-web service address and port (Default: http://kvfinder-web.cnpem.br:8081). Users may set this variable to a locally configured KVFinder-web service by changing 'server' global variable
+            KVFinder-web service address and path (Default: http://kvfinder-web.cnpem.br/api). Users may set this variable to a locally configured KVFinder-web service by changing 'server' global variable
         output_dir: str
             Path to output directory
         """
@@ -2972,18 +2981,18 @@ class Form(QDialog):
         output_dir: str
             Path to output directory
         """
+        from PyQt5.QtCore import Qt
         from PyQt5.QtWidgets import (
-            QVBoxLayout,
+            QDialogButtonBox,
             QHBoxLayout,
             QLabel,
             QLineEdit,
             QPushButton,
-            QSpacerItem,
             QSizePolicy,
-            QDialogButtonBox,
+            QSpacerItem,
             QStyle,
+            QVBoxLayout,
         )
-        from PyQt5.QtCore import Qt
 
         # Set Window Title
         self.setWindowTitle("Job ID Form")
@@ -3149,8 +3158,8 @@ class Form(QDialog):
 
         This method opens a QFileDialog to select a directory.
         """
-        from PyQt5.QtWidgets import QFileDialog
         from PyQt5.QtCore import QDir
+        from PyQt5.QtWidgets import QFileDialog
 
         fname = QFileDialog.getExistingDirectory(
             caption="Choose Output Directory", directory=os.getcwd()
@@ -3169,8 +3178,8 @@ class Form(QDialog):
 
         This method opens a QFileDialog to select a file.
         """
-        from PyQt5.QtWidgets import QFileDialog
         from PyQt5.QtCore import QDir
+        from PyQt5.QtWidgets import QFileDialog
 
         # Get results file
         fname, _ = QFileDialog.getOpenFileName(
@@ -3269,19 +3278,19 @@ class Message(QDialog):
         notification: str
             Notification from the KVFinder-web service
         """
+        from PyQt5.QtCore import Qt
+        from PyQt5.QtGui import QFont, QIcon
         from PyQt5.QtWidgets import (
-            QVBoxLayout,
+            QDialogButtonBox,
             QHBoxLayout,
             QLabel,
             QLineEdit,
-            QTextEdit,
-            QSpacerItem,
             QSizePolicy,
-            QDialogButtonBox,
+            QSpacerItem,
             QStyle,
+            QTextEdit,
+            QVBoxLayout,
         )
-        from PyQt5.QtCore import Qt
-        from PyQt5.QtGui import QFont, QIcon
 
         # Set Window Title
         self.setWindowTitle("Job Submission")
