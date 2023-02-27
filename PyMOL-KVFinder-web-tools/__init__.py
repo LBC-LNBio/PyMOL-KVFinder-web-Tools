@@ -1911,6 +1911,9 @@ class PyMOLKVFinderWebTools(QMainWindow):
         # Refresh residues
         self.refresh_residues()
 
+        # Set default view in results
+        self.default_view.setChecked(True)
+
         # Load files as PyMOL objects
         cmd.delete("cavities")
         cmd.delete("residues")

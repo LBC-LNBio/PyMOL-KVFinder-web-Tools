@@ -1531,7 +1531,7 @@ The description includes spatial, depth, constitutional and hydropathy character
         <item row="1" column="0">
          <widget class="QTabWidget" name="results_tabs">
           <property name="currentIndex">
-           <number>1</number>
+           <number>0</number>
           </property>
           <widget class="QWidget" name="jobs">
            <attribute name="title">
@@ -2040,6 +2040,12 @@ The description includes spatial, depth, constitutional and hydropathy character
                      <verstretch>0</verstretch>
                     </sizepolicy>
                    </property>
+                   <property name="minimumSize">
+                    <size>
+                     <width>150</width>
+                     <height>0</height>
+                    </size>
+                   </property>
                    <property name="selectionMode">
                     <enum>QAbstractItemView::MultiSelection</enum>
                    </property>
@@ -2067,6 +2073,12 @@ The description includes spatial, depth, constitutional and hydropathy character
                      <verstretch>0</verstretch>
                     </sizepolicy>
                    </property>
+                   <property name="minimumSize">
+                    <size>
+                     <width>150</width>
+                     <height>0</height>
+                    </size>
+                   </property>
                    <property name="selectionMode">
                     <enum>QAbstractItemView::MultiSelection</enum>
                    </property>
@@ -2088,6 +2100,18 @@ The description includes spatial, depth, constitutional and hydropathy character
                  </item>
                  <item>
                   <widget class="QListWidget" name="avg_depth_list">
+                   <property name="sizePolicy">
+                    <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+                     <horstretch>0</horstretch>
+                     <verstretch>0</verstretch>
+                    </sizepolicy>
+                   </property>
+                   <property name="minimumSize">
+                    <size>
+                     <width>150</width>
+                     <height>0</height>
+                    </size>
+                   </property>
                    <property name="selectionMode">
                     <enum>QAbstractItemView::MultiSelection</enum>
                    </property>
@@ -2109,6 +2133,18 @@ The description includes spatial, depth, constitutional and hydropathy character
                  </item>
                  <item>
                   <widget class="QListWidget" name="max_depth_list">
+                   <property name="sizePolicy">
+                    <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+                     <horstretch>0</horstretch>
+                     <verstretch>0</verstretch>
+                    </sizepolicy>
+                   </property>
+                   <property name="minimumSize">
+                    <size>
+                     <width>150</width>
+                     <height>0</height>
+                    </size>
+                   </property>
                    <property name="selectionMode">
                     <enum>QAbstractItemView::MultiSelection</enum>
                    </property>
@@ -2130,6 +2166,18 @@ The description includes spatial, depth, constitutional and hydropathy character
                  </item>
                  <item>
                   <widget class="QListWidget" name="avg_hydropathy_list">
+                   <property name="sizePolicy">
+                    <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+                     <horstretch>0</horstretch>
+                     <verstretch>0</verstretch>
+                    </sizepolicy>
+                   </property>
+                   <property name="minimumSize">
+                    <size>
+                     <width>150</width>
+                     <height>0</height>
+                    </size>
+                   </property>
                    <property name="selectionMode">
                     <enum>QAbstractItemView::MultiSelection</enum>
                    </property>
@@ -2156,6 +2204,12 @@ The description includes spatial, depth, constitutional and hydropathy character
                      <horstretch>0</horstretch>
                      <verstretch>0</verstretch>
                     </sizepolicy>
+                   </property>
+                   <property name="minimumSize">
+                    <size>
+                     <width>150</width>
+                     <height>0</height>
+                    </size>
                    </property>
                    <property name="selectionMode">
                     <enum>QAbstractItemView::MultiSelection</enum>
