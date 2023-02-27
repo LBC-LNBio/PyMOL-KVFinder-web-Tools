@@ -309,7 +309,23 @@ class PyMOLKVFinderWebTools(QMainWindow):
                 list1, list2
             )
         )
+        self.avg_depth_list.itemSelectionChanged.connect(
+            lambda list1=self.avg_depth_list, list2=self.max_depth_list: self.show_depth(
+                list1, list2
+            )
+        )
+        self.max_depth_list.itemSelectionChanged.connect(
+            lambda list1=self.max_depth_list, list2=self.avg_depth_list: self.show_depth(
+                list1, list2
+            )
+        )
+        self.avg_hydropathy_list.itemSelectionChanged.connect(
+            lambda list1=self.avg_hydropathy_list: self.show_hydropathy(list1)
+        )
         self.residues_list.itemSelectionChanged.connect(self.show_residues)
+        self.default_view.toggled.connect(self.show_default_view)
+        self.depth_view.toggled.connect(self.show_depth_view)
+        self.hydropathy_view.toggled.connect(self.show_hydropathy_view)
 
     def run(self) -> None:
         """
@@ -1885,6 +1901,13 @@ class PyMOLKVFinderWebTools(QMainWindow):
         # Refresh area
         self.refresh_area()
 
+        # Refresh depth
+        self.refresh_avg_depth()
+        self.refresh_max_depth()
+
+        # Refresh hydropathy
+        self.refresh_avg_hydropathy()
+
         # Refresh residues
         self.refresh_residues()
 
@@ -2044,6 +2067,34 @@ class PyMOLKVFinderWebTools(QMainWindow):
             self.area_list.addItem(item)
         return
 
+    def refresh_avg_depth(self) -> None:
+        # Get cavity indexes
+        indexes = sorted(results["RESULTS"]["AVG_DEPTH"].keys())
+        # Include Average Depth
+        for index in indexes:
+            item = f"{index}: {results['RESULTS']['AVG_DEPTH'][index]}"
+            self.avg_depth_list.addItem(item)
+        return
+
+    def refresh_max_depth(self) -> None:
+        # Get cavity indexes
+        indexes = sorted(results["RESULTS"]["MAX_DEPTH"].keys())
+        # Include Maximum Depth
+        for index in indexes:
+            item = f"{index}: {results['RESULTS']['MAX_DEPTH'][index]}"
+            self.max_depth_list.addItem(item)
+        return
+
+    def refresh_avg_hydropathy(self) -> None:
+        # Get cavity indexes
+        indexes = sorted(results["RESULTS"]["AVG_HYDROPATHY"].keys())
+        # Include Average Hydropathy
+        for index in indexes:
+            if index != "EisenbergWeiss":
+                item = f"{index}: {results['RESULTS']['AVG_HYDROPATHY'][index]}"
+                self.avg_hydropathy_list.addItem(item)
+        return
+
     def refresh_residues(self) -> None:
         """
         Fill "Interface Residues" QListBox with volume information of the results file.
@@ -2106,9 +2157,6 @@ class PyMOLKVFinderWebTools(QMainWindow):
         cmd.set("auto_zoom", 1)
 
     def show_cavities(self, list1, list2) -> None:
-        """
-        Creates a object named 'cavities' on PyMOL viewer to display cavities surrounding the cavity tags selected on the "Volume" or "Surface Area" QListBoxes.
-        """
         from pymol import cmd
 
         # Get items from list1
@@ -2140,7 +2188,7 @@ class PyMOLKVFinderWebTools(QMainWindow):
             return
 
         # Color filling cavity points as blue nonbonded
-        command = f"{self.cavity_pdb} and (resname "
+        command = f"obj {self.cavity_pdb} and (resname "
         while len(cavs) > 0:
             command = f"{command}{cavs.pop(0)},"
         command = f"{command[:-1]})"
@@ -2161,7 +2209,196 @@ class PyMOLKVFinderWebTools(QMainWindow):
         # Reset cavities output object
         cmd.disable(self.cavity_pdb)
         cmd.enable(self.cavity_pdb)
+        for item in cmd.get_names("all"):
+            if item == "hydropathy":
+                cmd.disable("hydropathy")
+                cmd.enable("hydropathy")
+            if item == "depths":
+                cmd.disable("depths")
+                cmd.enable("depths")
         cmd.set("auto_zoom", 1)
+
+    def show_depth(self, list1, list2) -> None:
+        from pymol import cmd
+
+        # Get items from list1
+        cavs = [item.text()[0:3] for item in list1.selectedItems()]
+
+        # Select items of list2
+        number_of_items = list1.count()
+        for index in range(number_of_items):
+            if list2.item(index).text()[0:3] in cavs:
+                list2.item(index).setSelected(True)
+            else:
+                list2.item(index).setSelected(False)
+
+        # Clean objects
+        cmd.set("auto_zoom", 0)
+        cmd.delete("deps")
+        cmd.delete("depths")
+
+        # Return if no cavity is selected
+        if len(cavs) < 1:
+            return
+
+        # Check if cavity file is loaded
+        control = 0
+        for item in cmd.get_names("all"):
+            if item == self.cavity_pdb:
+                control = 1
+        if control == 0:
+            return
+
+        # Color filling cavity points as blue nonbonded
+        command = f"obj {self.cavity_pdb} and (resname "
+        while len(cavs) > 0:
+            command = f"{command}{cavs.pop(0)},"
+        command = f"{command[:-1]})"
+        cmd.select("deps", command)
+
+        # Create cavities object with blue nonbonded
+        cmd.create("depths", "deps")
+        cmd.delete("deps")
+        cmd.spectrum("b", "rainbow", "depths")
+        cmd.show("nb_spheres", "depths")
+
+        # Reset cavities output object
+        cmd.disable(self.cavity_pdb)
+        for item in cmd.get_names("all"):
+            if item == "cavities":
+                cmd.disable("cavities")
+                cmd.enable("cavities")
+            if item == "depths":
+                cmd.disable("hydropathy")
+                cmd.enable("hydropathy")
+        cmd.enable(self.cavity_pdb)
+        cmd.set("auto_zoom", 1)
+
+    def show_hydropathy(self, list1) -> None:
+        from pymol import cmd
+
+        # Get items from list1
+        cavs = [item.text()[0:3] for item in list1.selectedItems()]
+
+        # Clean objects
+        cmd.set("auto_zoom", 0)
+        cmd.delete("hyd")
+        cmd.delete("hydropathy")
+
+        # Return if no cavity is selected
+        if len(cavs) < 1:
+            return
+
+        # Check if cavity file is loaded
+        control = 0
+        for item in cmd.get_names("all"):
+            if item == self.cavity_pdb:
+                control = 1
+        if control == 0:
+            return
+
+        # Color filling cavity points as blue nonbonded
+        command = f"obj {self.cavity_pdb} and (resname "
+        while len(cavs) > 0:
+            command = f"{command}{cavs.pop(0)},"
+        command = f"{command[:-1]}) and (name HA+HS)"
+        cmd.select("hyd", command)
+
+        # Create cavities object with blue nonbonded
+        cmd.create("hydropathy", "hyd")
+        cmd.delete("hyd")
+        cmd.spectrum("q", "yellow_white_blue", "hydropathy")
+        cmd.show("nb_spheres", "hydropathy")
+
+        # Reset cavities output object
+        cmd.disable(self.cavity_pdb)
+        for item in cmd.get_names("all"):
+            if item == "cavities":
+                cmd.disable("cavities")
+                cmd.enable("cavities")
+            if item == "depths":
+                cmd.disable("depths")
+                cmd.enable("depths")
+        cmd.enable(self.cavity_pdb)
+        cmd.set("auto_zoom", 1)
+
+    def show_default_view(self) -> None:
+        from pymol import cmd
+
+        # Clean objects
+        cmd.set("auto_zoom", 0)
+        cmd.delete("view")
+
+        # Check if cavity file is loaded
+        control = 0
+        for item in cmd.get_names("all"):
+            if item == self.cavity_pdb:
+                control = 1
+        if control == 0:
+            return
+
+        # Color filling cavity points as blue nonbonded
+        command = f"obj {self.cavity_pdb} and (name H+HA+HS)"
+        command = f"{command[:-1]})"
+        cmd.select("view", command)
+
+        # Create cavities object with blue nonbonded
+        cmd.hide("everything", self.cavity_pdb)
+        cmd.show("nonbonded", "view")
+        cmd.color("white", "view")
+        cmd.delete("view")
+
+    def show_depth_view(self) -> None:
+        from pymol import cmd
+
+        # Clean objects
+        cmd.set("auto_zoom", 0)
+        cmd.delete("view")
+
+        # Check if cavity file is loaded
+        control = 0
+        for item in cmd.get_names("all"):
+            if item == self.cavity_pdb:
+                control = 1
+        if control == 0:
+            return
+
+        # Color filling cavity points as blue nonbonded
+        command = f"obj {self.cavity_pdb} and (name H+HA+HS)"
+        command = f"{command[:-1]})"
+        cmd.select("view", command)
+
+        # Create cavities object with blue nonbonded
+        cmd.hide("everything", self.cavity_pdb)
+        cmd.show("nonbonded", "view")
+        cmd.spectrum("b", "rainbow", "view")
+        cmd.delete("view")
+
+    def show_hydropathy_view(self) -> None:
+        from pymol import cmd
+
+        # Clean objects
+        cmd.set("auto_zoom", 0)
+        cmd.delete("view")
+
+        # Check if cavity file is loaded
+        control = 0
+        for item in cmd.get_names("all"):
+            if item == self.cavity_pdb:
+                control = 1
+        if control == 0:
+            return
+
+        # Color filling cavity points as blue nonbonded
+        command = f"obj {self.cavity_pdb} and (name HA+HS)"
+        command = f"{command[:-1]})"
+        cmd.select("view", command)
+
+        # Create cavities object with blue nonbonded
+        cmd.hide("everything", self.cavity_pdb)
+        cmd.show("nonbonded", "view")
+        cmd.spectrum("q", "yellow_white_blue", "view")
+        cmd.delete("view")
 
     def clean_results(self) -> None:
         """
@@ -2186,6 +2423,13 @@ class PyMOLKVFinderWebTools(QMainWindow):
 
         # Area
         self.area_list.clear()
+
+        # Depth
+        self.avg_depth_list.clear()
+        self.max_depth_list.clear()
+
+        # Hydropathy
+        self.avg_hydropathy_list.clear()
 
         # Residues
         self.residues_list.clear()
