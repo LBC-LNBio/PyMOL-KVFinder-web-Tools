@@ -16,11 +16,11 @@ The KVFinder-web application has two independent components:
   - [KVFinder-web portal](https://github.com/LBC-LNBio/KVFinder-web-portal): a graphical web portal;
 - a RESTful web service: [KVFinder-web service](https://github.com/LBC-LNBio/KVFinder-web-service);
 
-The full KVFinder-web documentation can be found here: <http://lbc-lnbio.github.io/KVFinder-web>.
+The full KVFinder-web documentation can be found here: [http://lbc-lnbio.github.io/KVFinder-web](http://lbc-lnbio.github.io/KVFinder-web).
 
 ### PyMOL KVFinder-web Tools
 
-The PyMOL KVFinder-web Tools, written in Python and Qt, is a PyMOL v2.x plugin for detecting and characterizing biomolecular cavities at a KVFinder-web service with functionalities similar to [PyMOL parKVFinder Tools](https://github.com/LBC-LNBio/parKVFinder/wiki/parKVFinder-Tutorial#pymol2-parkvfinder-tools), which is natively configured to our publicly available web service (<http://kvfinder-web.cnpem.br>).
+The PyMOL KVFinder-web Tools, written in Python and Qt, is a PyMOL v2.x plugin for detecting and characterizing biomolecular cavities at a KVFinder-web service with functionalities similar to [PyMOL parKVFinder Tools](https://github.com/LBC-LNBio/parKVFinder/wiki/parKVFinder-Tutorial#pymol2-parkvfinder-tools), which is natively configured to our publicly available web service ([http://kvfinder-web.cnpem.br](http://kvfinder-web.cnpem.br)).
 
 #### Installation
 
@@ -68,6 +68,10 @@ to:
 ```
 
 If the KVFinder-web service is on another computer on your network, you must provide the IP Address instead of localhost.
+
+#### Troubleshooting
+
+Recently, an issue arose from Qt missing OpenSSL 3.x support on Linux distributions, so a workaround is available [here](https://github.com/LBC-LNBio/PyMOL-KVFinder-web-Tools/issues/1). If you have any other issues, please check our [Issues](https://github.com/LBC-LNBio/PyMOL-KVFinder-web-Tools/issues) section.
 
 ### KVFinder-web portal
 
