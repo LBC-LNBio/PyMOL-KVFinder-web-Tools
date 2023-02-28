@@ -21,7 +21,6 @@
 #                                                                             #
 ###############################################################################
 
-
 from __future__ import absolute_import, annotations, print_function
 
 import json
@@ -30,6 +29,10 @@ from typing import Any, Dict, Optional
 
 import toml
 from PyQt6 import QtCore, QtWidgets
+
+__name__ = "PyMOL KVFinder-web Tools"
+__version__ = "v1.0.0"
+
 
 # global reference to avoid garbage collection of our dialog
 dialog = None
@@ -45,31 +48,31 @@ worker = None
 # Server                                 #
 server = "http://kvfinder-web.cnpem.br"  #
 # Path                                   #
-path = "/api"  #
+path = "/api"                            #
 #                                        #
 # Days until job expire                  #
-days_job_expire = 1  #
+days_job_expire = 1                      #
 #                                        #
 # Data limit                             #
-data_limit = "5 Mb"  #
+data_limit = "5 Mb"                      #
 #                                        #
 # Timers (msec)                          #
-time_restart_job_checks = 5000  #
-time_server_down = 60000  #
-time_no_jobs = 5000  #
-time_between_jobs = 2000  #
-time_wait_status = 5000  #
+time_restart_job_checks = 5000           #
+time_server_down = 60000                 #
+time_no_jobs = 5000                      #
+time_between_jobs = 2000                 #
+time_wait_status = 5000                  #
 #                                        #
 # Times jobs completed with downloaded   #
 # results are not checked in service     #
-times_job_completed_no_checked = 500  #
+times_job_completed_no_checked = 500     #
 #                                        #
 # Verbosity: print extra information     #
 # 0: No extra information                #
 # 1: Print GUI information               #
 # 2: Print Worker information            #
 # 3: Print all information (Worker/GUI)  #
-verbosity = 0  #
+verbosity = 0                            #
 ##########################################
 
 
@@ -170,6 +173,7 @@ def run_plugin_gui():
     Open PyMOL KVFinder-web Tools dialog
     """
     import sys
+
     global dialog
 
     if dialog is None:
@@ -3264,7 +3268,10 @@ class Form(QtWidgets.QDialog):
             QtWidgets.QSizePolicy.Policy.Fixed, QtWidgets.QSizePolicy.Policy.Fixed
         )
         self.hspacer = QtWidgets.QSpacerItem(
-            40, 20, QtWidgets.QSizePolicy.Policy.Expanding, QtWidgets.QSizePolicy.Policy.Minimum
+            40,
+            20,
+            QtWidgets.QSizePolicy.Policy.Expanding,
+            QtWidgets.QSizePolicy.Policy.Minimum,
         )
         self.hframe2.addWidget(self.base_name_label)
         self.hframe2.addWidget(self.base_name)
@@ -3309,14 +3316,21 @@ class Form(QtWidgets.QDialog):
 
         # Create Vertical Spacer
         self.vspacer = QtWidgets.QSpacerItem(
-            0, 0, QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Expanding
+            0,
+            0,
+            QtWidgets.QSizePolicy.Policy.Minimum,
+            QtWidgets.QSizePolicy.Policy.Expanding,
         )
 
         # Create Dialog Button Box
         self.buttons = QtWidgets.QDialogButtonBox(self)
         ok = QtWidgets.QPushButton("&Add")
-        ok.setIcon(self.style().standardIcon(QtWidgets.QStyle.StandardPixmap.SP_DialogOkButton))
-        self.buttons.addButton(ok, QtWidgets.QDialogButtonBox.StandardButton.Apply) # old: AcceptRole
+        ok.setIcon(
+            self.style().standardIcon(QtWidgets.QStyle.StandardPixmap.SP_DialogOkButton)
+        )
+        self.buttons.addButton(
+            ok, QtWidgets.QDialogButtonBox.StandardButton.Apply
+        )  # old: AcceptRole
         self.buttons.addButton(QtWidgets.QDialogButtonBox.StandardButton.Cancel)
         self.buttons.setCenterButtons(True)
 
@@ -3555,7 +3569,10 @@ class Message(QtWidgets.QDialog):
 
         # Vertical spacer
         self.vspacer1 = QtWidgets.QSpacerItem(
-            20, 40, QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Expanding
+            20,
+            40,
+            QtWidgets.QSizePolicy.Policy.Minimum,
+            QtWidgets.QSizePolicy.Policy.Expanding,
         )
 
         # Create Job ID layout
@@ -3566,7 +3583,8 @@ class Message(QtWidgets.QDialog):
             self.job_id_label.setText("Job ID:")
             self.job_id_label.setSizePolicy(
                 QtWidgets.QSizePolicy(
-                    QtWidgets.QSizePolicy.Policy.Fixed, QtWidgets.QSizePolicy.Policy.Preferred
+                    QtWidgets.QSizePolicy.Policy.Fixed,
+                    QtWidgets.QSizePolicy.Policy.Preferred,
                 )
             )
             self.job_id_label.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
@@ -3574,7 +3592,8 @@ class Message(QtWidgets.QDialog):
             self.job_id = QtWidgets.QLineEdit(self)
             self.job_id.setSizePolicy(
                 QtWidgets.QSizePolicy(
-                    QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Fixed
+                    QtWidgets.QSizePolicy.Policy.Minimum,
+                    QtWidgets.QSizePolicy.Policy.Fixed,
                 )
             )
             self.job_id.setReadOnly(True)
@@ -3592,7 +3611,8 @@ class Message(QtWidgets.QDialog):
             self.status_label.setText("Status:")
             self.status_label.setSizePolicy(
                 QtWidgets.QSizePolicy(
-                    QtWidgets.QSizePolicy.Policy.Fixed, QtWidgets.QSizePolicy.Policy.Preferred
+                    QtWidgets.QSizePolicy.Policy.Fixed,
+                    QtWidgets.QSizePolicy.Policy.Preferred,
                 )
             )
             self.status_label.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
@@ -3600,7 +3620,8 @@ class Message(QtWidgets.QDialog):
             self.status = QtWidgets.QLineEdit(self)
             self.status.setSizePolicy(
                 QtWidgets.QSizePolicy(
-                    QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Fixed
+                    QtWidgets.QSizePolicy.Policy.Minimum,
+                    QtWidgets.QSizePolicy.Policy.Fixed,
                 )
             )
             self.status.setReadOnly(True)
@@ -3621,7 +3642,8 @@ class Message(QtWidgets.QDialog):
             self.notification = QtWidgets.QTextEdit(self)
             self.notification.setSizePolicy(
                 QtWidgets.QSizePolicy(
-                    QtWidgets.QSizePolicy.Policy.Expanding, QtWidgets.QSizePolicy.Policy.Expanding
+                    QtWidgets.QSizePolicy.Policy.Expanding,
+                    QtWidgets.QSizePolicy.Policy.Expanding,
                 )
             )
             self.notification.setReadOnly(True)
@@ -3632,7 +3654,10 @@ class Message(QtWidgets.QDialog):
 
         # Vertical spacer
         self.vspacer2 = QtWidgets.QSpacerItem(
-            20, 40, QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Expanding
+            20,
+            40,
+            QtWidgets.QSizePolicy.Policy.Minimum,
+            QtWidgets.QSizePolicy.Policy.Expanding,
         )
 
         # Create Dialog Button Box
