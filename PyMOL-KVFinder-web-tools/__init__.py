@@ -26,12 +26,10 @@ from __future__ import absolute_import, annotations, print_function
 
 import json
 import os
-import urllib.parse
 from typing import Any, Dict, Optional
 
 import toml
-from PyQt5.QtCore import QThread, pyqtSignal, pyqtSlot
-from PyQt5.QtWidgets import QDialog, QLineEdit, QMainWindow
+from PyQt6 import QtCore, QtWidgets
 
 # global reference to avoid garbage collection of our dialog
 dialog = None
@@ -47,31 +45,31 @@ worker = None
 # Server                                 #
 server = "http://kvfinder-web.cnpem.br"  #
 # Path                                   #
-path = "/api"                            #
+path = "/api"  #
 #                                        #
 # Days until job expire                  #
-days_job_expire = 1                      #
+days_job_expire = 1  #
 #                                        #
 # Data limit                             #
-data_limit = "5 Mb"                      #
+data_limit = "5 Mb"  #
 #                                        #
 # Timers (msec)                          #
-time_restart_job_checks = 5000           #
-time_server_down = 60000                 #
-time_no_jobs = 5000                      #
-time_between_jobs = 2000                 #
-time_wait_status = 5000                  #
+time_restart_job_checks = 5000  #
+time_server_down = 60000  #
+time_no_jobs = 5000  #
+time_between_jobs = 2000  #
+time_wait_status = 5000  #
 #                                        #
 # Times jobs completed with downloaded   #
 # results are not checked in service     #
-times_job_completed_no_checked = 500     #
+times_job_completed_no_checked = 500  #
 #                                        #
 # Verbosity: print extra information     #
 # 0: No extra information                #
 # 1: Print GUI information               #
 # 2: Print Worker information            #
 # 3: Print all information (Worker/GUI)  #
-verbosity = 0                            #
+verbosity = 0  #
 ##########################################
 
 
@@ -171,15 +169,17 @@ def run_plugin_gui():
     """
     Open PyMOL KVFinder-web Tools dialog
     """
+    import sys
     global dialog
 
     if dialog is None:
-        dialog = PyMOLKVFinderWebTools()
+        dialog = QtWidgets.QApplication([])
+        window = PyMOLKVFinderWebTools()
+        window.show()
+    dialog.exec()
 
-    dialog.show()
 
-
-class PyMOLKVFinderWebTools(QMainWindow):
+class PyMOLKVFinderWebTools(QtWidgets.QMainWindow):
     """
     PyMOL KVFinder Web Tools
 
@@ -187,7 +187,7 @@ class PyMOLKVFinderWebTools(QMainWindow):
     """
 
     # Signals
-    msgbox_signal = pyqtSignal(bool)
+    msgbox_signal = QtCore.pyqtSignal(bool)
 
     def __init__(self, server=server, path=path):
         super(PyMOLKVFinderWebTools, self).__init__()
@@ -201,7 +201,7 @@ class PyMOLKVFinderWebTools(QMainWindow):
         path: str
             Server path to communicate with KVFinder-web service (Default: /api)
         """
-        from PyQt5.QtNetwork import QNetworkAccessManager
+        from PyQt6.QtNetwork import QNetworkAccessManager
 
         # Define Default Parameters
         self._default = _Default()
@@ -218,7 +218,7 @@ class PyMOLKVFinderWebTools(QMainWindow):
         self.z = 0.0
 
         # Define server
-        self.server = urllib.parse.urljoin(server, path)
+        self.server = f"{server}/{path.replace('/', '')}"
         self.network_manager = QNetworkAccessManager()
 
         # Check server status
@@ -251,9 +251,9 @@ class PyMOLKVFinderWebTools(QMainWindow):
         """
         This method initializes graphical user interface from .ui file, bind scrollbars to QListWidgets and hooks up buttons with callbacks.
         """
-        # Import the PyQt5 interface
-        from PyQt5 import QtWidgets
-        from PyQt5.uic import loadUi
+        # Import the PyQt interface
+        from PyQt6 import QtWidgets
+        from PyQt6.uic import loadUi
 
         # populate the QMainWindow from our *.ui file
         uifile = os.path.join(os.path.dirname(__file__), "PyMOL-KVFinder-web-tools.ui")
@@ -331,10 +331,10 @@ class PyMOLKVFinderWebTools(QMainWindow):
         """
         Get detection parameters and molecular structures defined on the GUI and submit a job to KVFinder-web service.
 
-        The job submission is handled by QtNetwork package, part of PyQt5, that uses a POST method to send a JSON with data to KVFinder-web service.
+        The job submission is handled by QtNetwork package, part of PyQt6, that uses a POST method to send a JSON with data to KVFinder-web service.
         """
-        from PyQt5 import QtNetwork
-        from PyQt5.QtCore import QJsonDocument, QUrl
+        from PyQt6 import QtNetwork
+        from PyQt6.QtCore import QJsonDocument, QUrl
 
         # Create job
         parameters = self.create_parameters()
@@ -351,7 +351,8 @@ class PyMOLKVFinderWebTools(QMainWindow):
             url = QUrl(f"{self.server}/create")
             request = QtNetwork.QNetworkRequest(url)
             request.setHeader(
-                QtNetwork.QNetworkRequest.ContentTypeHeader, "application/json"
+                QtNetwork.QNetworkRequest.KnownHeaders.ContentTypeHeader,
+                "application/json",
             )
 
             # Prepare data
@@ -371,14 +372,15 @@ class PyMOLKVFinderWebTools(QMainWindow):
 
         If there are an error in the request, this method displays a QMessageBox with the corresponding error message and HTTP error code.
         """
-        from PyQt5 import QtNetwork
+        from PyQt6 import QtNetwork
 
         # Get QNetworkReply error status
         er = self.reply.error()
 
         # Handle Post Response
-        if er == QtNetwork.QNetworkReply.NoError:
-            reply = json.loads(str(self.reply.readAll(), "utf-8"))
+        if er == QtNetwork.QNetworkReply.NetworkError.NoError:
+            reply = str(self.reply.readAll(), "utf-8")
+            reply = json.loads(reply)
 
             # Save job id
             self.job.id = reply["id"]
@@ -392,7 +394,7 @@ class PyMOLKVFinderWebTools(QMainWindow):
                 message = Message(
                     "Job successfully submitted to KVFinder-web service!", self.job.id
                 )
-                message.exec_()
+                message.exec()
 
                 # Save job file
                 self.job.status = "queued"
@@ -419,7 +421,7 @@ class PyMOLKVFinderWebTools(QMainWindow):
                         self.job.id,
                         status,
                     )
-                    message.exec_()
+                    message.exec()
 
                     # Export results
                     self.job.output = reply
@@ -457,10 +459,10 @@ class PyMOLKVFinderWebTools(QMainWindow):
                         self.job.id,
                         status,
                     )
-                    message.exec_()
+                    message.exec()
 
-        elif er == QtNetwork.QNetworkReply.ConnectionRefusedError:
-            from PyQt5.QtWidgets import QMessageBox
+        elif er == QtNetwork.QNetworkReply.NetworkError.ConnectionRefusedError:
+            from PyQt6 import QtWidgets
 
             # Set server status in GUI
             self.server_down()
@@ -470,14 +472,14 @@ class PyMOLKVFinderWebTools(QMainWindow):
                 print(
                     "\n\033[93mWarning:\033[0m KVFinder-web service is Offline! Try again later!\n"
                 )
-            QMessageBox.critical(
+            QtWidgets.QMessageBox.critical(
                 self,
                 "Job Submission",
                 "KVFinder-web service is Offline!\n\nTry again later!",
             )
 
-        elif er == QtNetwork.QNetworkReply.UnknownContentError:
-            from PyQt5.QtWidgets import QMessageBox
+        elif er == QtNetwork.QNetworkReply.NetworkError.UnknownContentError:
+            from PyQt6 import QtWidgets
 
             # Set server status in GUI
             self.server_up()
@@ -487,14 +489,14 @@ class PyMOLKVFinderWebTools(QMainWindow):
                 print(
                     f"\n\033[91mError:\033[0mJob exceedes the maximum payload of {data_limit} on KVFinder-web service!\n"
                 )
-            QMessageBox.critical(
+            QtWidgets.QMessageBox.critical(
                 self,
                 "Job Submission",
                 f"Job exceedes the maximum payload of {data_limit} on KVFinder-web service!",
             )
 
-        elif er == QtNetwork.QNetworkReply.TimeoutError:
-            from PyQt5.QtWidgets import QMessageBox
+        elif er == QtNetwork.QNetworkReply.NetworkError.TimeoutError:
+            from PyQt6 import QtWidgets
 
             # Set server status in GUI
             self.server_down()
@@ -504,7 +506,7 @@ class PyMOLKVFinderWebTools(QMainWindow):
                 print(
                     "\n\033[93mWarning:\033[0m The connection to the KVFinder-web server timed out!\n"
                 )
-            QMessageBox.critical(
+            QtWidgets.QMessageBox.critical(
                 self,
                 "Job Submission",
                 "The connection to the KVFinder-web server timed out!\n\nCheck your connection and KVFinder-web server status!",
@@ -521,7 +523,7 @@ class PyMOLKVFinderWebTools(QMainWindow):
                 status=None,
                 notification=f"{self.reply.errorString()}\n{reply}\n",
             )
-            message.exec_()
+            message.exec()
 
     def show_grid(self) -> None:
         """
@@ -532,7 +534,7 @@ class PyMOLKVFinderWebTools(QMainWindow):
         If there are an error, a QMessageBox will be displayed.
         """
         from pymol import cmd
-        from PyQt5 import QtWidgets
+        from PyQt6 import QtWidgets
 
         global x, y, z
 
@@ -794,19 +796,21 @@ class PyMOLKVFinderWebTools(QMainWindow):
             Whether the GUI is starting up.
         """
         from pymol import cmd
-        from PyQt5.QtWidgets import QCheckBox, QMessageBox
+        from PyQt6 import QtWidgets
 
         # Restore Results Tab
         if not is_startup:
-            reply = QMessageBox(self)
+            reply = QtWidgets.QMessageBox(self)
             reply.setText("Also restore Results Visualization tab?")
             reply.setWindowTitle("Restore Values")
-            reply.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
-            reply.setIcon(QMessageBox.Information)
-            reply.checkbox = QCheckBox("Also remove input and ligand PDBs?")
+            reply.setStandardButtons(
+                QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No
+            )
+            reply.setIcon(QtWidgets.QMessageBox.Information)
+            reply.checkbox = QtWidgets.QCheckBox("Also remove input and ligand PDBs?")
             reply.layout = reply.layout()
             reply.layout.addWidget(reply.checkbox, 1, 2)
-            if reply.exec_() == QMessageBox.Yes:
+            if reply.exec() == QtWidgets.QMessageBox.Yes:
                 # Remove cavities, residues and pdbs (input, ligand, cavity)
                 cmd.delete("cavities")
                 cmd.delete("residues")
@@ -883,15 +887,14 @@ class PyMOLKVFinderWebTools(QMainWindow):
 
         This method opens a QFileDialog to select a directory.
         """
-        from PyQt5.QtCore import QDir
-        from PyQt5.QtWidgets import QFileDialog
+        from PyQt6 import QtCore, QtWidgets
 
-        fname = QFileDialog.getExistingDirectory(
+        fname = QtWidgets.QFileDialog.getExistingDirectory(
             caption="Choose Output Directory", directory=os.getcwd()
         )
 
         if fname:
-            fname = QDir.toNativeSeparators(fname)
+            fname = QtCore.QDir.toNativeSeparators(fname)
             if os.path.isdir(fname):
                 self.output_dir_path.setText(fname)
 
@@ -1387,7 +1390,7 @@ class PyMOLKVFinderWebTools(QMainWindow):
 
         This method displays a help message to the user, explaining the variables shown on the Box adjustment frame.
         """
-        from PyQt5 import QtCore, QtWidgets
+        from PyQt6 import QtCore, QtWidgets
 
         text = QtCore.QCoreApplication.translate(
             "KVFinderWeb",
@@ -1398,7 +1401,7 @@ class PyMOLKVFinderWebTools(QMainWindow):
         help_information.setText(text)
         help_information.setWindowTitle("Help")
         help_information.setStyleSheet("QLabel{min-width:500 px;}")
-        help_information.exec_()
+        help_information.exec()
 
     def create_parameters(self) -> Dict[str, Any]:
         """
@@ -1426,18 +1429,18 @@ class PyMOLKVFinderWebTools(QMainWindow):
         if self.input.currentText() != "":
             parameters["files"]["pdb"] = self.input.currentText()
         else:
-            from PyQt5.QtWidgets import QMessageBox
+            from PyQt6 import QtWidgets
 
-            QMessageBox.critical(self, "Error", "Select an input PDB!")
+            QtWidgets.QMessageBox.critical(self, "Error", "Select an input PDB!")
             return False
         # ligand
         if self.ligand_adjustment.isChecked():
             if self.ligand.currentText() != "":
                 parameters["files"]["ligand"] = self.ligand.currentText()
             else:
-                from PyQt5.QtWidgets import QMessageBox
+                from PyQt6 import QtWidgets
 
-                QMessageBox.critical(self, "Error", "Select an ligand PDB!")
+                QtWidgets.QMessageBox.critical(self, "Error", "Select an ligand PDB!")
                 return False
         # output
         parameters["files"]["output"] = self.output_dir_path.text()
@@ -1473,9 +1476,9 @@ class PyMOLKVFinderWebTools(QMainWindow):
         if (self.volume_cutoff.value() == 0.0) and (
             self.removal_distance.value() == 0.0
         ):
-            from PyQt5.QtWidgets import QMessageBox
+            from PyQt6 import QtWidgets
 
-            QMessageBox.critical(
+            QtWidgets.QMessageBox.critical(
                 self,
                 "Error",
                 "Removal distance and Volume Cutoff cannot be zero at the same time!",
@@ -1674,7 +1677,7 @@ class PyMOLKVFinderWebTools(QMainWindow):
         """
         # Create Form
         form = Form(self.server, self.output_dir_path.text())
-        reply = form.exec_()
+        reply = form.exec()
 
         if reply:
             # Get data from form
@@ -1694,18 +1697,19 @@ class PyMOLKVFinderWebTools(QMainWindow):
         data: dict
             A Python dictionary containing the data of a Job ID Form (class Form)
         """
-        from PyQt5 import QtNetwork
-        from PyQt5.QtCore import QUrl
+        from PyQt6 import QtNetwork
+        from PyQt6.QtCore import QUrl
 
         if verbosity in [1, 3]:
             print(f"[==> Requesting Job ID ({data['id']}) to KVFinder-web service ...")
 
         try:
             # Prepare request
-            url = QUrl(urllib.parse.urljoin(self.server, data["id"]))
+            url = QUrl(f"{self.server}/{data['id']}")
             request = QtNetwork.QNetworkRequest(url)
             request.setHeader(
-                QtNetwork.QNetworkRequest.ContentTypeHeader, "application/json"
+                QtNetwork.QNetworkRequest.KnownHeaders.ContentTypeHeader,
+                "application/json",
             )
 
             # Get Request
@@ -1722,12 +1726,12 @@ class PyMOLKVFinderWebTools(QMainWindow):
 
         If there are an error in the request, this method displays a QMessageBox with the corresponding error message and HTTP error code.
         """
-        from PyQt5 import QtNetwork
+        from PyQt6 import QtNetwork
 
         # Get QNetwork error status
         error = self.reply.error()
 
-        if error == QtNetwork.QNetworkReply.NoError:
+        if error == QtNetwork.QNetworkReply.NetworkError.NoError:
             # Read data retrived from server
             reply = json.loads(str(self.reply.readAll(), "utf-8"))
 
@@ -1766,7 +1770,7 @@ class PyMOLKVFinderWebTools(QMainWindow):
             if verbosity in [1, 3]:
                 print("> Job successfully added!")
             message = Message("Job successfully added!", job.id, job.status)
-            message.exec_()
+            message.exec()
 
             # Include job to available jobs
             self.available_jobs.addItem(job.id)
@@ -1778,27 +1782,27 @@ class PyMOLKVFinderWebTools(QMainWindow):
                 except Exception as e:
                     print("Error occurred: ", e)
 
-        elif error == QtNetwork.QNetworkReply.ContentNotFoundError:
-            from PyQt5.QtWidgets import QMessageBox
+        elif error == QtNetwork.QNetworkReply.NetworkError.ContentNotFoundError:
+            from PyQt6 import QtWidgets
 
             # Message to user
             if verbosity in [1, 3]:
                 print(
                     f"> Job ID ({self.data['id']}) was not found in KVFinder-web service!"
                 )
-            QMessageBox.critical(
+            QtWidgets.QMessageBox.critical(
                 self,
                 "Job Submission",
                 f"Job ID ({self.data['id']}) was not found in KVFinder-web service!",
             )
 
-        elif error == QtNetwork.QNetworkReply.ConnectionRefusedError:
-            from PyQt5.QtWidgets import QMessageBox
+        elif error == QtNetwork.QNetworkReply.NetworkError.ConnectionRefusedError:
+            from PyQt6 import QtWidgets
 
             # Message to user
             if verbosity in [1, 3]:
                 print("> KVFinder-web service is Offline! Try again later!\n")
-            QMessageBox.critical(
+            QtWidgets.QMessageBox.critical(
                 self,
                 "Job Submission",
                 "KVFinder-web service is Offline!\n\nTry again later!",
@@ -1857,9 +1861,9 @@ class PyMOLKVFinderWebTools(QMainWindow):
         if os.path.exists(results_file) and results_file.endswith(".toml"):
             print(f"> Loading results from: {self.vis_results_file_entry.text()}")
         else:
-            from PyQt5.QtWidgets import QMessageBox
+            from PyQt6 import QtWidgets
 
-            error_msg = QMessageBox.critical(
+            error_msg = QtWidgets.QMessageBox.critical(
                 self, "Error", "Results file cannot be opened! Check results file path."
             )
             return False
@@ -1875,14 +1879,14 @@ class PyMOLKVFinderWebTools(QMainWindow):
         elif "FILES_PATH" in results.keys():
             pass
         else:
-            from PyQt5.QtWidgets import QMessageBox
+            from PyQt6 import QtWidgets
 
-            error_msg = QMessageBox.critical(
+            error_msg = QtWidgets.QMessageBox.critical(
                 self,
                 "Error",
                 "Results file has incorrect format! Please check your file.",
             )
-            error_msg.exec_()
+            error_msg.exec()
             return False
 
         if "PARAMETERS" in results.keys():
@@ -1948,11 +1952,10 @@ class PyMOLKVFinderWebTools(QMainWindow):
 
         This method opens a QFileDialog to select a results file of parKVFinder.
         """
-        from PyQt5.QtCore import QDir
-        from PyQt5.QtWidgets import QFileDialog
+        from PyQt6 import QtCore, QtWidgets
 
         # Get results file
-        fname, _ = QFileDialog.getOpenFileName(
+        fname, _ = QtWidgets.QFileDialog.getOpenFileName(
             self,
             caption="Choose KVFinder Results File",
             directory=os.getcwd(),
@@ -1960,7 +1963,7 @@ class PyMOLKVFinderWebTools(QMainWindow):
         )
 
         if fname:
-            fname = QDir.toNativeSeparators(fname)
+            fname = QtCore.QDir.toNativeSeparators(fname)
             if os.path.exists(fname):
                 self.vis_results_file_entry.setText(fname)
 
@@ -2437,7 +2440,7 @@ class PyMOLKVFinderWebTools(QMainWindow):
         # Residues
         self.residues_list.clear()
 
-    @pyqtSlot(bool)
+    @QtCore.pyqtSlot(bool)
     def set_server_status(self, status) -> None:
         """
         PyQt Slot to change the "Server Status" field to Online or Offline.
@@ -2447,7 +2450,7 @@ class PyMOLKVFinderWebTools(QMainWindow):
         else:
             self.server_down()
 
-    @pyqtSlot()
+    @QtCore.pyqtSlot()
     def server_up(self) -> None:
         """
         PyQt Slot to change the "Server Status" field to Online.
@@ -2456,7 +2459,7 @@ class PyMOLKVFinderWebTools(QMainWindow):
         self.server_status.setText("Online")
         self.server_status.setStyleSheet("color: green;")
 
-    @pyqtSlot()
+    @QtCore.pyqtSlot()
     def server_down(self) -> None:
         """
         PyQt Slot to change the "Server Status" field to Offline.
@@ -2465,7 +2468,7 @@ class PyMOLKVFinderWebTools(QMainWindow):
         self.server_status.setText("Offline")
         self.server_status.setStyleSheet("color: red;")
 
-    @pyqtSlot(list)
+    @QtCore.pyqtSlot(list)
     def set_available_jobs(self, available_jobs) -> None:
         """
         PyQt Slot to add the jobs of the available_jobs variable to the "Available Jobs" combo box.
@@ -2551,7 +2554,7 @@ class PyMOLKVFinderWebTools(QMainWindow):
             self.job_output_dir_path_entry.clear()
             self.job_parameters_entry.clear()
 
-    @pyqtSlot(str)
+    @QtCore.pyqtSlot(str)
     def msg_results_not_available(self, job_id) -> None:
         """
         PyQt Slot to inform the user that a job, registered on ~/.KVFinder-web directory, is no longer available on the KVFinder-web service.
@@ -2561,10 +2564,10 @@ class PyMOLKVFinderWebTools(QMainWindow):
         job_id: str
             Job ID
         """
-        from PyQt5.QtWidgets import QMessageBox
+        from PyQt6 import QtWidgets
 
         # Message to user
-        message = QMessageBox(self)
+        message = QtWidgets.QMessageBox(self)
         message.setWindowTitle(f"Job Notification")
         message.setText(
             f"Job ID: {job_id}\nThis job is not available anymore in KVFinder-web service!\n"
@@ -2572,7 +2575,7 @@ class PyMOLKVFinderWebTools(QMainWindow):
         message.setInformativeText(
             f"Jobs are kept for {days_job_expire} days after completion."
         )
-        if message.exec_() == QMessageBox.Ok:
+        if message.exec() == QtWidgets.QMessageBox.Ok:
             # Send signal to Worker thread
             self.msgbox_signal.emit(False)
 
@@ -2870,7 +2873,7 @@ class Job(object):
                 f.write("\n")
 
 
-class Worker(QThread):
+class Worker(QtCore.QThread):
     """
     Worker thread
 
@@ -2878,11 +2881,11 @@ class Worker(QThread):
     """
 
     # Signals
-    id_signal = pyqtSignal(str)
-    server_down = pyqtSignal()
-    server_up = pyqtSignal()
-    server_status_signal = pyqtSignal(bool)
-    available_jobs_signal = pyqtSignal(list)
+    id_signal = QtCore.pyqtSignal(str)
+    server_down = QtCore.pyqtSignal()
+    server_up = QtCore.pyqtSignal()
+    server_status_signal = QtCore.pyqtSignal(bool)
+    available_jobs_signal = QtCore.pyqtSignal(list)
 
     def __init__(self, server, server_status):
         super().__init__()
@@ -2901,8 +2904,6 @@ class Worker(QThread):
         self.server_status = server_status
 
     def run(self) -> None:
-        from PyQt5.QtCore import QEventLoop, QTimer
-
         """
         Starts worker thread.
 
@@ -2918,6 +2919,7 @@ class Worker(QThread):
 
         If, for some reason, the KVFinder-web service is unreachable, the worker thread will communicate the GUI thread, that will change the value of the "Server Status" field to Offline. Otherwise, the "Server Status" field will be set to Online.
         """
+        from PyQt6 import QtCore
 
         # Times completed jobs with results are not checked in KVFinder-web service
         counter = 0
@@ -2926,9 +2928,9 @@ class Worker(QThread):
             # Loop to wait QMessageBox signal from GUI thread that delete jobs that are no long available in KVFinder-web service
             while self.wait:
                 # Wait timer to check wait status
-                loop = QEventLoop()
-                QTimer.singleShot(time_wait_status, loop.quit)
-                loop.exec_()
+                loop = QtCore.QEventLoop()
+                QtCore.QTimer.singleShot(time_wait_status, loop.quit)
+                loop.exec()
 
             # Constantly getting available jobs
             jobs = _get_jobs()
@@ -2981,9 +2983,9 @@ class Worker(QThread):
 
                     # Wait timer to check next available job
                     if len(jobs) > 1:
-                        loop = QEventLoop()
-                        QTimer.singleShot(time_between_jobs, loop.quit)
-                        loop.exec_()
+                        loop = QtCore.QEventLoop()
+                        QtCore.QTimer.singleShot(time_between_jobs, loop.quit)
+                        loop.exec()
 
                 # If at least one job completed with downloaded results, increment counter
                 if flag:
@@ -2991,9 +2993,9 @@ class Worker(QThread):
                     flag = False
 
                 # Wait timer to restart available job checks
-                loop = QEventLoop()
-                QTimer.singleShot(time_restart_job_checks, loop.quit)
-                loop.exec_()
+                loop = QtCore.QEventLoop()
+                QtCore.QTimer.singleShot(time_restart_job_checks, loop.quit)
+                loop.exec()
 
             # No jobs available to check status
             else:
@@ -3012,9 +3014,9 @@ class Worker(QThread):
                     self.server_status_signal.emit(status)
 
                     # Wait timer to repeat service status check
-                    loop = QEventLoop()
-                    QTimer.singleShot(time_server_down, loop.quit)
-                    loop.exec_()
+                    loop = QtCore.QEventLoop()
+                    QtCore.QTimer.singleShot(time_server_down, loop.quit)
+                    loop.exec()
 
                     # Message to user
                     if verbosity in [2, 3]:
@@ -3026,9 +3028,9 @@ class Worker(QThread):
                 self.server_status_signal.emit(self.server_status)
 
                 # Wait timer when no jobs are being checked
-                loop = QEventLoop()
-                QTimer.singleShot(time_no_jobs, loop.quit)
-                loop.exec_()
+                loop = QtCore.QEventLoop()
+                QtCore.QTimer.singleShot(time_no_jobs, loop.quit)
+                loop.exec()
 
             if dialog is None:
                 self.terminate()
@@ -3042,17 +3044,18 @@ class Worker(QThread):
         job_id: str
             Job ID
         """
-        from PyQt5 import QtNetwork
-        from PyQt5.QtCore import QUrl
+        from PyQt6 import QtNetwork
+        from PyQt6.QtCore import QUrl
 
         try:
             self.network_manager = QtNetwork.QNetworkAccessManager()
 
             # Prepare request
-            url = QUrl(urllib.parse.urljoin(self.server, job_id))
+            url = QUrl(f"{self.server}/{job_id}")
             request = QtNetwork.QNetworkRequest(url)
             request.setHeader(
-                QtNetwork.QNetworkRequest.ContentTypeHeader, "application/json"
+                QtNetwork.QNetworkRequest.KnownHeaders.ContentTypeHeader,
+                "application/json",
             )
 
             # Get Request
@@ -3073,12 +3076,12 @@ class Worker(QThread):
 
         If there is a Connection error, the worker thread will communicate the GUI thread, that will change the value of the "Server Status" field to Offline.
         """
-        from PyQt5 import QtNetwork
+        from PyQt6 import QtNetwork
 
         # Get QNetwork error status
         error = self.reply.error()
 
-        if error == QtNetwork.QNetworkReply.NoError:
+        if error == QtNetwork.QNetworkReply.NetworkError.NoError:
             # Read data retrived from service
             reply = json.loads(str(self.reply.readAll(), "utf-8"))
 
@@ -3097,7 +3100,7 @@ class Worker(QThread):
             # Send Server Up Signal to GUI Thread
             self.server_up.emit()
 
-        elif error == QtNetwork.QNetworkReply.ContentNotFoundError:
+        elif error == QtNetwork.QNetworkReply.NetworkError.ContentNotFoundError:
             # Send Server Up Signal to GUI Thread
             self.server_up.emit()
 
@@ -3115,7 +3118,7 @@ class Worker(QThread):
             except Exception as e:
                 print("Error occurred: ", e)
 
-        elif error == QtNetwork.QNetworkReply.ConnectionRefusedError:
+        elif error == QtNetwork.QNetworkReply.NetworkError.ConnectionRefusedError:
             # Message to user
             if verbosity in [2, 3]:
                 print("\n\033[93mWarning:\033[0m KVFinder-web service is Offline!\n")
@@ -3163,7 +3166,7 @@ class Worker(QThread):
 
         return exist
 
-    @pyqtSlot(bool)
+    @QtCore.pyqtSlot(bool)
     def wait_status(self, status) -> None:
         """
         PyQt Slot that change the wait attribute to True or False.
@@ -3196,7 +3199,7 @@ class Worker(QThread):
         os.rmdir(d)
 
 
-class Form(QDialog):
+class Form(QtWidgets.QDialog):
     """
     Class that defines a custom QDialog to Add a Job ID to currently registered jobs.
     """
@@ -3228,98 +3231,93 @@ class Form(QDialog):
         output_dir: str
             Path to output directory
         """
-        from PyQt5.QtCore import Qt
-        from PyQt5.QtWidgets import (
-            QDialogButtonBox,
-            QHBoxLayout,
-            QLabel,
-            QLineEdit,
-            QPushButton,
-            QSizePolicy,
-            QSpacerItem,
-            QStyle,
-            QVBoxLayout,
-        )
+        from PyQt6 import QtCore, QtWidgets
 
         # Set Window Title
         self.setWindowTitle("Job ID Form")
 
         # Set alignment of QDialog
-        self.verticalLayout = QVBoxLayout(self)
-        self.resize(800, 220)
+        self.verticalLayout = QtWidgets.QVBoxLayout(self)
+        # self.resize(800, 220)
         self.setFixedHeight(220)
 
         # Create header label
-        self.header = QLabel(self)
+        self.header = QtWidgets.QLabel(self)
         self.header.setText("Fill the fields and click on 'Add' button:")
-        self.header.setAlignment(Qt.AlignCenter)
+        self.header.setAlignment(QtCore.Qt.AlignCenter)
 
         # Create Job ID layout
-        self.hframe1 = QHBoxLayout()
-        self.job_id_label = QLabel(self)
+        self.hframe1 = QtWidgets.QHBoxLayout()
+        self.job_id_label = QtWidgets.QLabel(self)
         self.job_id_label.setText("Job ID:")
-        self.job_id = QLineEdit(self)
+        self.job_id = QtWidgets.QLineEdit(self)
         self.hframe1.addWidget(self.job_id_label)
         self.hframe1.addWidget(self.job_id)
 
         # Create Output Base Name layout
-        self.hframe2 = QHBoxLayout()
-        self.base_name_label = QLabel(self)
+        self.hframe2 = QtWidgets.QHBoxLayout()
+        self.base_name_label = QtWidgets.QLabel(self)
         self.base_name_label.setText("Output Base Name:")
-        self.base_name = QLineEdit(self)
+        self.base_name = QtWidgets.QLineEdit(self)
         self.base_name.setText("output")
-        self.base_name.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
-        self.hspacer = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
+        self.base_name.setSizePolicy(
+            QtWidgets.QSizePolicy.Policy.Fixed, QtWidgets.QSizePolicy.Policy.Fixed
+        )
+        self.hspacer = QtWidgets.QSpacerItem(
+            40, 20, QtWidgets.QSizePolicy.Policy.Expanding, QtWidgets.QSizePolicy.Policy.Minimum
+        )
         self.hframe2.addWidget(self.base_name_label)
         self.hframe2.addWidget(self.base_name)
         self.hframe2.addItem(self.hspacer)
 
         # Create Output Directory layout
-        self.hframe3 = QHBoxLayout()
-        self.output_dir_label = QLabel(self)
+        self.hframe3 = QtWidgets.QHBoxLayout()
+        self.output_dir_label = QtWidgets.QLabel(self)
         self.output_dir_label.setText("Output Directory:")
-        self.output_dir = QLineEdit(self)
+        self.output_dir = QtWidgets.QLineEdit(self)
         self.output_dir.setReadOnly(True)
         self.output_dir.setText(output_dir)
-        self.button_browse_output_dir = QPushButton(self)
+        self.button_browse_output_dir = QtWidgets.QPushButton(self)
         self.button_browse_output_dir.setText("Browse ...")
         self.hframe3.addWidget(self.output_dir_label)
         self.hframe3.addWidget(self.output_dir)
         self.hframe3.addWidget(self.button_browse_output_dir)
 
         # Create Input file layout
-        self.hframe4 = QHBoxLayout()
-        self.input_file_label = QLabel(self)
+        self.hframe4 = QtWidgets.QHBoxLayout()
+        self.input_file_label = QtWidgets.QLabel(self)
         self.input_file_label.setText("Input File (optional):")
-        self.input_file = QLineEdit(self)
+        self.input_file = QtWidgets.QLineEdit(self)
         self.input_file.setReadOnly(True)
-        self.button_browse_input_file = QPushButton(self)
+        self.button_browse_input_file = QtWidgets.QPushButton(self)
         self.button_browse_input_file.setText("Browse ...")
         self.hframe4.addWidget(self.input_file_label)
         self.hframe4.addWidget(self.input_file)
         self.hframe4.addWidget(self.button_browse_input_file)
 
         # Create Ligand file layout
-        self.hframe5 = QHBoxLayout()
-        self.ligand_file_label = QLabel(self)
+        self.hframe5 = QtWidgets.QHBoxLayout()
+        self.ligand_file_label = QtWidgets.QLabel(self)
         self.ligand_file_label.setText("Ligand File (optional):")
-        self.ligand_file = QLineEdit(self)
+        self.ligand_file = QtWidgets.QLineEdit(self)
         self.ligand_file.setReadOnly(True)
-        self.button_browse_ligand_file = QPushButton(self)
+        self.button_browse_ligand_file = QtWidgets.QPushButton(self)
         self.button_browse_ligand_file.setText("Browse ...")
         self.hframe5.addWidget(self.ligand_file_label)
         self.hframe5.addWidget(self.ligand_file)
         self.hframe5.addWidget(self.button_browse_ligand_file)
 
         # Create Vertical Spacer
-        self.vspacer = QSpacerItem(0, 0, QSizePolicy.Minimum, QSizePolicy.Expanding)
+        self.vspacer = QtWidgets.QSpacerItem(
+            0, 0, QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Expanding
+        )
 
         # Create Dialog Button Box
-        self.buttons = QDialogButtonBox(self)
-        ok = QPushButton("&Add")
-        ok.setIcon(self.style().standardIcon(QStyle.SP_DialogOkButton))
-        self.buttons.addButton(ok, QDialogButtonBox.AcceptRole)
-        self.buttons.addButton(QDialogButtonBox.Cancel)
+        self.buttons = QtWidgets.QDialogButtonBox(self)
+        ok = QtWidgets.QPushButton("&Add")
+        ok.setIcon(self.style().standardIcon(QtWidgets.QStyle.StandardPixmap.SP_DialogOkButton))
+        self.buttons.addButton(ok, QtWidgets.QDialogButtonBox.StandardButton.Apply) # old: AcceptRole
+        self.buttons.addButton(QtWidgets.QDialogButtonBox.StandardButton.Cancel)
         self.buttons.setCenterButtons(True)
 
         # Add Widgets to layout
@@ -3361,14 +3359,14 @@ class Form(QDialog):
             return self.accept()
         # Cancel
         else:
-            from PyQt5.QtWidgets import QMessageBox
+            from PyQt6 import QtWidgets
 
             # Message to user
             if verbosity in [2, 3]:
                 print(
                     "Fill required fields: Job ID, Output Base Name and/or Output Directory."
                 )
-            QMessageBox.critical(
+            QtWidgets.QMessageBox.critical(
                 self,
                 "Job Submission",
                 "Fill required fields: Job ID, Output Base Name and Output Directory.",
@@ -3405,36 +3403,34 @@ class Form(QDialog):
 
         This method opens a QFileDialog to select a directory.
         """
-        from PyQt5.QtCore import QDir
-        from PyQt5.QtWidgets import QFileDialog
+        from PyQt6 import QtCore, QtWidgets
 
-        fname = QFileDialog.getExistingDirectory(
+        fname = QtWidgets.QFileDialog.getExistingDirectory(
             caption="Choose Output Directory", directory=os.getcwd()
         )
 
         if fname:
-            fname = QDir.toNativeSeparators(fname)
+            fname = QtCore.QDir.toNativeSeparators(fname)
             if os.path.isdir(fname):
                 self.output_dir.setText(fname)
 
         return
 
-    def select_file(self, entry: QLineEdit, caption: str) -> None:
+    def select_file(self, entry: QtWidgets.QLineEdit, caption: str) -> None:
         """
         Callback for the "Browse ..." button
 
         This method opens a QFileDialog to select a file.
         """
-        from PyQt5.QtCore import QDir
-        from PyQt5.QtWidgets import QFileDialog
+        from PyQt6 import QtCore, QtWidgets
 
         # Get results file
-        fname, _ = QFileDialog.getOpenFileName(
+        fname, _ = QtWidgets.QFileDialog.getOpenFileName(
             self, caption=caption, directory=os.getcwd(), filter="PDB file (*.pdb)"
         )
 
         if fname:
-            fname = QDir.toNativeSeparators(fname)
+            fname = QtCore.QDir.toNativeSeparators(fname)
             if os.path.exists(fname):
                 entry.setText(fname)
         else:
@@ -3443,7 +3439,7 @@ class Form(QDialog):
         return
 
 
-class Message(QDialog):
+class Message(QtWidgets.QDialog):
     """
     Class that defines a custom QDialog that displays the Job ID, Job status and a notification of a Job submission.
     """
@@ -3525,118 +3521,124 @@ class Message(QDialog):
         notification: str
             Notification from the KVFinder-web service
         """
-        from PyQt5.QtCore import Qt
-        from PyQt5.QtGui import QFont, QIcon
-        from PyQt5.QtWidgets import (
-            QDialogButtonBox,
-            QHBoxLayout,
-            QLabel,
-            QLineEdit,
-            QSizePolicy,
-            QSpacerItem,
-            QStyle,
-            QTextEdit,
-            QVBoxLayout,
-        )
+        from PyQt6 import QtCore, QtGui, QtWidgets
 
         # Set Window Title
         self.setWindowTitle("Job Submission")
 
         # Set alignment of QDialog
-        self.vframe = QVBoxLayout(self)
+        self.vframe = QtWidgets.QVBoxLayout(self)
         self.setFixedSize(425, 200)
 
         # Create message layout
-        self.hframe1 = QHBoxLayout()
+        self.hframe1 = QtWidgets.QHBoxLayout(self)
         # Icon
-        self.icon = QLabel(self)
+        self.icon = QtWidgets.QLabel(self)
         pixmap = (
             self.style()
-            .standardIcon(QStyle.SP_MessageBoxInformation)
-            .pixmap(30, 30, QIcon.Active, QIcon.On)
+            .standardIcon(QtWidgets.QStyle.StandardPixmap.SP_MessageBoxInformation)
+            .pixmap(30, 30, QtGui.QIcon.Mode.Active, QtGui.QIcon.State.On)
         )
         self.icon.setPixmap(pixmap)
-        self.icon.setAlignment(Qt.AlignCenter)
-        self.icon.setSizePolicy(QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed))
+        self.icon.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+        self.icon.setSizePolicy(
+            QtWidgets.QSizePolicy(
+                QtWidgets.QSizePolicy.Policy.Fixed, QtWidgets.QSizePolicy.Policy.Fixed
+            )
+        )
         # Message
-        self.msg = QLabel(self)
-        self.msg.setAlignment(Qt.AlignCenter)
+        self.msg = QtWidgets.QLabel(self)
+        self.msg.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
         # add to layout
         self.hframe1.addWidget(self.icon)
         self.hframe1.addWidget(self.msg)
 
         # Vertical spacer
-        self.vspacer1 = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
+        self.vspacer1 = QtWidgets.QSpacerItem(
+            20, 40, QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Expanding
+        )
 
         # Create Job ID layout
-        self.hframe2 = QHBoxLayout()
+        self.hframe2 = QtWidgets.QHBoxLayout(self)
         if job_id:
             # Job ID label
-            self.job_id_label = QLabel(self)
+            self.job_id_label = QtWidgets.QLabel(self)
             self.job_id_label.setText("Job ID:")
             self.job_id_label.setSizePolicy(
-                QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Preferred)
+                QtWidgets.QSizePolicy(
+                    QtWidgets.QSizePolicy.Policy.Fixed, QtWidgets.QSizePolicy.Policy.Preferred
+                )
             )
-            self.job_id_label.setAlignment(Qt.AlignCenter)
+            self.job_id_label.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
             # Job ID entry
-            self.job_id = QLineEdit(self)
+            self.job_id = QtWidgets.QLineEdit(self)
             self.job_id.setSizePolicy(
-                QSizePolicy(QSizePolicy.Minimum, QSizePolicy.Fixed)
+                QtWidgets.QSizePolicy(
+                    QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Fixed
+                )
             )
             self.job_id.setReadOnly(True)
             self.job_id.setFixedWidth(200)
             # add to layout
             self.hframe2.addWidget(self.job_id_label)
             self.hframe2.addWidget(self.job_id)
-            self.hframe2.setAlignment(Qt.AlignCenter)
+            self.hframe2.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
 
         # Create Status layout
-        self.hframe3 = QHBoxLayout()
+        self.hframe3 = QtWidgets.QHBoxLayout(self)
         if status:
             # Job ID label
-            self.status_label = QLabel(self)
+            self.status_label = QtWidgets.QLabel(self)
             self.status_label.setText("Status:")
             self.status_label.setSizePolicy(
-                QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Preferred)
+                QtWidgets.QSizePolicy(
+                    QtWidgets.QSizePolicy.Policy.Fixed, QtWidgets.QSizePolicy.Policy.Preferred
+                )
             )
-            self.status_label.setAlignment(Qt.AlignCenter)
+            self.status_label.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
             # Job ID entry
-            self.status = QLineEdit(self)
+            self.status = QtWidgets.QLineEdit(self)
             self.status.setSizePolicy(
-                QSizePolicy(QSizePolicy.Minimum, QSizePolicy.Fixed)
+                QtWidgets.QSizePolicy(
+                    QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Fixed
+                )
             )
             self.status.setReadOnly(True)
-            font = QFont()
+            font = QtGui.QFont()
             font.setBold(True)
             self.status.setFont(font)
             self.status.setFixedWidth(90)
-            self.status.setAlignment(Qt.AlignCenter)
+            self.status.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
             # add to layout
             self.hframe3.addWidget(self.status_label)
             self.hframe3.addWidget(self.status)
-            self.hframe3.setAlignment(Qt.AlignCenter)
+            self.hframe3.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
 
         # Create Notification layout
-        self.hframe4 = QHBoxLayout()
+        self.hframe4 = QtWidgets.QHBoxLayout(self)
         if notification:
             # Notification entry
-            self.notification = QTextEdit(self)
+            self.notification = QtWidgets.QTextEdit(self)
             self.notification.setSizePolicy(
-                QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+                QtWidgets.QSizePolicy(
+                    QtWidgets.QSizePolicy.Policy.Expanding, QtWidgets.QSizePolicy.Policy.Expanding
+                )
             )
             self.notification.setReadOnly(True)
-            self.notification.setAlignment(Qt.AlignCenter)
+            self.notification.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
             # add to layout
             self.hframe4.addWidget(self.notification)
-            self.hframe4.setAlignment(Qt.AlignCenter)
+            self.hframe4.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
 
         # Vertical spacer
-        self.vspacer2 = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
+        self.vspacer2 = QtWidgets.QSpacerItem(
+            20, 40, QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Expanding
+        )
 
         # Create Dialog Button Box
-        self.buttonBox = QDialogButtonBox(self)
-        self.buttonBox.setOrientation(Qt.Horizontal)
-        self.buttonBox.setStandardButtons(QDialogButtonBox.Ok)
+        self.buttonBox = QtWidgets.QDialogButtonBox(self)
+        self.buttonBox.setOrientation(QtCore.Qt.Orientation.Horizontal)
+        self.buttonBox.setStandardButtons(QtWidgets.QDialogButtonBox.StandardButton.Ok)
         self.buttonBox.setCenterButtons(True)
 
         # Add Widgets to layout
@@ -3668,11 +3670,17 @@ def _check_server_status(server) -> bool:
     status: bool
         Whether the server is Online or Offline
     """
-    import urllib.request
+    from PyQt6 import QtNetwork
+    from PyQt6.QtCore import QUrl
 
     try:
-        urllib.request.urlopen(server, timeout=1).getcode()
-        return True
+        req = QtNetwork.QNetworkRequest(QUrl(server.replace("api", "")))
+        newtork_manager = QtNetwork.QNetworkAccessManager()
+        reply = newtork_manager.get(req)
+        if reply.error() == QtNetwork.QNetworkReply.NetworkError.NoError:
+            return True
+        else:
+            return False
     except Exception:
         return False
 
@@ -3729,13 +3737,16 @@ about_text = """
 <p style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br /></p>
 <p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">Please refer and cite the parKVFinder paper if you use it in a publication.</p>
 <p style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br /></p>
-<p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">For our cavity detection and characterization software, cite:</p>
-<p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">João Victor da Silva Guerra, Helder Veras Filho, Leandro Oliveira Bortot, Rodrigo Vargas Honorato, José Geraldo de Carvalho Pereira, Paulo Sergio Lopes de Oliveira, ParKVFinder: A thread-level parallel approach in biomolecular cavity detection, SoftwareX, 2020, https://doi.org/10.1016/j.softx.2020.100606.</p>
 <p style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br /></p>
-<p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">For our KVFinder-web service, cite:</p>
-<p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">&lt;paper&gt;</p>
-<p style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br /></p>
-<p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">Citation for PyMOL 2 may be found here:</p>
+<p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span style=" font-weight:600; text-decoration: underline;">Citations</span></p>
+<p style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Sans Serif';"><br /></p>
+<p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span style=" font-family:'Sans Serif';">If you use </span><span style=" font-family:'Sans Serif'; text-decoration: underline;">KVFinder-web </span><span style=" font-family:'Sans Serif';">(</span><span style=" font-family:'Sans Serif'; text-decoration: underline;">KVFinder-web service, KVFinder-web portal or PyMOL </span><span style=" font-family:'Sans Serif'; text-decoration: underline;">KVFinder-web Tools</span><span style=" font-family:'Sans Serif';">), please cite:</span></p>
+<p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span style=" font-family:'Sans Serif';">&lt;paper&gt;</span></p>
+<p style=" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">If you use <span style=" text-decoration: underline;">parKVFinder</span>, please cite:</p>
+<p style=" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">João Victor da Silva Guerra, Helder Veras Ribeiro Filho, Leandro Oliveira Bortot, Rodrigo Vargas Honorato, José Geraldo de Carvalho Pereira, Paulo Sergio Lopes de Oliveira. ParKVFinder: A thread-level parallel approach in biomolecular cavity detection. SoftwareX (2020). <a href="https://doi.org/10.1016/j.softx.2020.100606"><span style=" text-decoration: underline; color:#0000ff;">https://doi.org/10.1016/j.softx.2020.100606</span></a>.</p>
+<p style=" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">If you use <span style=" text-decoration: underline;">depth and hydropathy characterization</span>, please also cite:</p>
+<p style=" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">Guerra, J.V.d., Ribeiro-Filho, H.V., Jara, G.E. et al. pyKVFinder: an efficient and integrable Python package for biomolecular cavity detection and characterization in data science. BMC Bioinformatics 22, 607 (2021). <a href="https://doi.org/10.1186/s12859-021-04519-4"><span style=" text-decoration: underline; color:#0000ff;">https://doi.org/10.1186/s12859-021-04519-4</span></a>.</p>
+<p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">PyMOL citation may be found here:</p>
 <p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><a href="http://pymol.sourceforge.net/faq.html#CITE"><span style=" text-decoration: underline; color:#0000ff;">https://pymol.org/2/support.html?</span></a></p></body></html>
 """.format(
     days_job_expire, "s" if days_job_expire > 1 else ""
