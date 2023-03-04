@@ -77,7 +77,7 @@
        <enum>QFrame::Sunken</enum>
       </property>
       <property name="text">
-       <string notr="true">parKVFinder software identifies and describes cavities in a target biomolecular structure using a dual probe system.
+       <string notr="true">KVFinder-web identifies and describes cavities in a target biomolecular structure using a dual probe system.
 
 The description includes spatial, depth, constitutional and hydropathy characterization. The spatial description includes shape, volume, and area. The depth description defines depths for each cavity point, shown in the B-factor, and calculates the average and maximum depth per cavity. The constitutional description includes amino acids that form the identified cavities. The hydropathy description maps Eisenberg &amp; Weiss hydrophobicity scale at surface points, shown in the Q-factor, and estimates average hydropathy per cavity.</string>
       </property>
