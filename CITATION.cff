@@ -1,0 +1,64 @@
+cff-version: 1.2.0
+title: PyMOL KVFinder-web Tools
+message: >-
+  If you use this PyMOL KVFinder-web Tools in your research,
+  please cite it as below.
+type: software
+authors:
+  - given-names: João
+    family-names: Guerra
+    name-particle: Victor da Silva
+    email: joao.guerra@lnbio.cnpem.br
+    affiliation: >-
+      Brazilian Center for Research in Energy and Materials
+      (CNPEM)
+    orcid: 'https://orcid.org/0000-0002-6800-4425'
+  - affiliation: >-
+      Brazilian Center for Research in Energy and Materials
+      (CNPEM)
+    given-names: Helder
+    name-particle: Veras
+    family-names: Ribeiro-Filho
+    email: helder.ribeiro@lnbio.cnpem.br
+  - given-names: José
+    name-particle: Geraldo de Carvalho
+    family-names: Pereira
+    email: jose.pereira@lnbio.cnpem.br
+    affiliation: >-
+      Brazilian Center for Research in Energy and Materials
+      (CNPEM)
+  - given-names: Paulo
+    name-particle: Sergio
+    family-names: Lopes-de-Oliveira
+    email: paulo.oliveira@lnbio.cnpem.br
+    affiliation: >-
+      Brazilian Center for Research in Energy and Materials
+      (CNPEM)
+repository-code: 'https://github.com/LBC-LNBio/PyMOL-KVFinder-web-Tools'
+url: 'http://lbc-lnbio.github.io/KVFinder-web'
+abstract: >-
+  KVFinder-web is an open-source web-based application of an
+  updated version of parKVFinder software (v1.2.0) for
+  cavity detection and characterization of any type of
+  biomolecular structure. The characterization includes
+  spatial, depth, constitutional and hydropathy
+  characterization.
+
+
+  The KVFinder-web has two independent components:
+    - a RESTful web service: KVFinder-web service;
+    - a graphical web portal: KVFinder-web portal.
+
+  To broaden the range of possibilities for user
+  interaction, we also provide additional client-side
+  applications, that are:
+    - a graphical PyMOL plugin: PyMOL KVFinder-web Tools;
+keywords:
+  - pymol-plugin
+  - webservice-client
+  - cavity-detection
+  - cavity-characterization
+license: GPL-3.0 license 
+commit: 8d70bbb
+version: v1.0.0
+date-released: '2023-04-13'
